@@ -1,0 +1,9 @@
+# generated outputs (regenerable via `python -m team_eval.cli`)
+runs/
+sessions/
+annotations/
+
+# python
+__pycache__/
+*.pyc
+*.pyo

@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Team Trajectory Report</title>
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+<style>
+  :root{
+    --bg:#0f172a; --panel:#111c33; --panel2:#0b1426; --ink:#e2e8f0; --mut:#94a3b8;
+    --line:#1e293b; --pass:#22c55e; --warn:#f59e0b; --fail:#ef4444; --na:#64748b; --pend:#818cf8;
+    --accent:#38bdf8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,Segoe UI,Roboto,sans-serif}
+  header{padding:14px 20px;border-bottom:1px solid var(--line);background:linear-gradient(90deg,#0b1426,#111c33)}
+  header h1{margin:0;font-size:18px}
+  header .sub{color:var(--mut);font-size:12px;margin-top:3px}
+  nav{display:flex;gap:4px;padding:8px 16px;background:var(--panel2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  nav button{background:#1e293b;color:var(--mut);border:1px solid var(--line);padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px}
+  nav button.active{background:var(--accent);color:#031321;border-color:var(--accent);font-weight:600}
+  main{padding:16px 20px}
+  .tab{display:none} .tab.active{display:block}
+  .grid{display:grid;gap:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+  .badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600}
+  .b-pass{background:#052e16;color:var(--pass)} .b-warn{background:#3b2406;color:var(--warn)}
+  .b-fail{background:#3b0d0d;color:var(--fail)} .b-na{background:#1e293b;color:var(--na)} .b-pend{background:#1e2547;color:var(--pend)}
+  .score{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+  .gauge{font-size:34px;font-weight:700}
+  .stat{color:var(--mut);font-size:12px}
+  .stat b{color:var(--ink);font-size:13px}
+  #topo{height:62vh;background:var(--panel2);border:1px solid var(--line);border-radius:10px}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--mut)}
+  .legend i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:4px;vertical-align:middle}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--mut);font-weight:600;font-size:12px}
+  tr.evi{display:none} tr.evi.show{display:table-row}
+  tr.evi td{background:var(--panel2);color:var(--mut);font-size:12px;white-space:pre-wrap}
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .filters select,.filters input{background:#0b1426;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:12px}
+  .chip{display:inline-block;background:#1e293b;color:var(--mut);border-radius:5px;padding:0 6px;font-size:11px;margin-right:3px}
+  .timeline{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px}
+  .tl-row{display:grid;grid-template-columns:160px 1fr;align-items:center;height:30px;margin:2px 0}
+  .tl-label{font-size:12px;color:var(--mut);padding-right:8px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tl-track{position:relative;height:18px;background:#0b1426;border-radius:4px}
+  .tl-bar{position:absolute;height:18px;border-radius:4px;opacity:.9;cursor:pointer;min-width:3px}
+  .tl-bar:hover{outline:2px solid #fff}
+  .tl-axis{display:grid;grid-template-columns:160px 1fr;color:var(--mut);font-size:10px;margin-top:4px}
+  .steps-list{max-height:70vh;overflow:auto}
+  .step{border:1px solid var(--line);border-radius:8px;margin-bottom:8px;background:var(--panel2)}
+  .step summary{cursor:pointer;padding:8px 10px;font-size:13px}
+  .step .body{padding:0 10px 10px;font-size:12px;color:var(--mut)}
+  .step .body pre{white-space:pre-wrap;background:#0b1426;padding:8px;border-radius:6px;color:#cbd5e1;overflow:auto}
+  .tool{background:#0b1426;border-left:3px solid var(--accent);padding:5px 8px;margin:4px 0;border-radius:4px}
+  .tool .nm{color:var(--accent);font-weight:600}
+  .errmark{color:var(--fail)}
+  details>summary{list-style}
+  .annot label{margin-right:10px;font-size:12px}
+  .btn{background:var(--accent);color:#031321;border:0;border-radius:6px;padding:6px 12px;cursor:pointer;font-weight:600;font-size:12px}
+  .muted{color:var(--mut);font-size:12px}
+  .role-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle}
+  .node-tip{position:fixed;background:#000c;border:1px solid var(--line);border-radius:8px;padding:8px;font-size:12px;pointer-events:none;z-index:50;max-width:280px}
+</style>
+</head>
+<body>
+<header>
+  <h1>⚙ FleetView Team Trajectory <span id="h-team" class="muted"></span></h1>
+  <div class="sub" id="h-meta"></div>
+</header>
+<nav>
+  <button data-tab="topo" class="active">拓扑图</button>
+  <button data-tab="seq">时序图</button>
+  <button data-tab="time">执行时间线</button>
+  <button data-tab="steps">步骤下钻</button>
+  <button data-tab="eval">评测</button>
+  <button data-tab="data">原始数据</button>
+</nav>
+<main>
+<!-- TOPOLOGY -->
+<section class="tab active" id="tab-topo">
+  <div class="card" style="margin-bottom:12px">
+    <div class="score">
+      <div><div class="gauge" id="g-health">—</div><div class="stat">health (客观)</div></div>
+      <div id="g-counts" class="stat"></div>
+      <div class="stat" id="g-pattern"></div>
+    </div>
+  </div>
+  <div id="topo"></div>
+  <div class="legend" id="legend"></div>
+  <div class="muted" style="margin-top:6px">点节点→下方“步骤下钻”查看；边粗细=次数；节点边框色=verdict (绿pass/黄warn/红fail)。</div>
+</section>
+<!-- SEQUENCE -->
+<section class="tab" id="tab-seq">
+  <div class="card" style="margin-bottom:10px">
+    <div class="filters">
+      <label class="muted">显示:</label>
+      <label><input type="checkbox" class="seqf" value="spawn" checked> spawn</label>
+      <label><input type="checkbox" class="seqf" value="message" checked> message</label>
+      <label><input type="checkbox" class="seqf" value="task" checked> task</label>
+      <label><input type="checkbox" class="seqf" value="error" checked> error</label>
+      <span class="muted" id="seq-count"></span>
+    </div>
+    <div id="seq-scroll" style="overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:8px;background:var(--panel2)">
+      <div id="seq-svg"></div>
+    </div>
+    <div class="muted" style="margin-top:6px">纵向=时间(上→下)，每列=一个角色生命线，箭头=角色间交互(spawn/message/task)，红点=错误。点事件看详情。</div>
+    <div id="seq-detail" class="card" style="margin-top:8px;display:none"></div>
+  </div>
+</section>
+<!-- TIMELINE -->
+<section class="tab" id="tab-time">
+  <div class="card"><div id="timeline" class="timeline"></div></div>
+  <div class="muted" style="margin-top:6px">按 active 窗口绘制的 Gantt；条形重叠即并行。hover 看时间跨度。</div>
+</section>
+<!-- STEPS -->
+<section class="tab" id="tab-steps">
+  <div class="card">
+    <div class="filters">
+      <select id="step-node"></select>
+      <span class="muted" id="step-info"></span>
+    </div>
+    <div id="steps-list" class="steps-list"></div>
+  </div>
+</section>
+<!-- EVAL -->
+<section class="tab" id="tab-eval">
+  <div class="card" style="margin-bottom:12px">
+    <b>结论 · 7 个考察角度</b> <span class="muted">(回答"任务完成了吗→规划好吗→谁拖后腿→哪崩的→值不值")</span>
+    <div id="conclusion-list" style="margin-top:8px"></div>
+  </div>
+  <div class="grid" style="grid-template-columns:1fr 1fr;margin-bottom:12px">
+    <div class="card"><b>角色评测</b> <span class="muted">(每角色多份执行+自愈+主观判定)</span><div id="role-list" style="margin-top:8px;font-size:12px"></div></div>
+    <div class="card"><b>任务评测</b> <span class="muted">(keypoint 判据)</span><div id="task-list" style="margin-top:8px;font-size:12px"></div></div>
+  </div>
+  <div class="card" style="margin-bottom:12px">
+    <div class="filters">
+      <select id="f-outcome"><option value="">全部 outcome</option><option>pass</option><option>warn</option><option>fail</option><option>not_applicable</option><option>pending</option></select>
+      <select id="f-dim"><option value="">全部维度</option></select>
+      <input id="f-text" placeholder="搜索 id/标题/tag…"/>
+      <button class="btn" id="export-annot">导出标注 JSON</button>
+    </div>
+    <table id="eval-table">
+      <thead><tr><th></th><th>ID</th><th>维度</th><th>检查点</th><th>结果</th><th>severity</th><th>说明 / 证据</th></tr></thead>
+      <tbody id="eval-body"></tbody>
+    </table>
+  </div>
+</section>
+<!-- DATA -->
+<section class="tab" id="tab-data">
+  <div class="card"><pre id="raw-json" style="max-height:75vh;overflow:auto;font-size:11px"></pre></div>
+</section>
+</main>
+<div class="node-tip" id="tip" style="display:none"></div>
+
+<script>
+const P = {{ payload_json | safe }};
+const VERDICT_BORDER = {pass:'#22c55e',warn:'#f59e0b',fail:'#ef4444',info:'#38bdf8'};
+const OUT_SYMBOL = {pass:'✓',warn:'!',fail:'✗',not_applicable:'–',pending:'?'};
+const OUT_CLASS = {pass:'b-pass',warn:'b-warn',fail:'b-fail',not_applicable:'b-na',pending:'b-pend'};
+const EDGE_COLOR = {spawn:'#38bdf8',message:'#a78bfa',task_assign:'#34d399',task_update:'#f472b6'};
+
+// ---- header ----
+document.getElementById('h-team').textContent = P.meta.team_name || P.meta.session_id;
+const sc = P.meta.score_counts||{};
+document.getElementById('h-meta').textContent =
+  `pattern=${P.meta.pattern||'?'} (conf ${P.meta.pattern_confidence}) · workers=${P.meta.worker_count} · reduce=${P.meta.reduce_quality||'?'} · `+
+  `ATIF ${P.atif_valid===false?'✗':(P.atif_valid?'✓':'?')} · ${P.meta.span_first||''} → ${P.meta.span_last||''}`;
+document.getElementById('g-health').textContent = (P.meta.health==null?'—':P.meta.health);
+document.getElementById('g-counts').innerHTML =
+  `<b>${sc.pass||0}</b> pass · <b>${sc.warn||0}</b> warn · <b>${sc.fail||0}</b> fail · <b>${sc.pending||0}</b> pending`;
+const red = P.meta.reduce_quality;
+document.getElementById('g-pattern').innerHTML = `<b>${P.meta.pattern}</b> · reduce=<b>${red}</b><br>${P.stats.wall_clock_sec? (P.stats.wall_clock_sec/60).toFixed(1)+' min wall-clock':''}`;
+
+// legend
+const leg = document.getElementById('legend');
+P.nodes.forEach(n=>{const s=document.createElement('span');s.innerHTML=`<i style="background:${n.color}"></i>${n.role}`;leg.appendChild(s)});
+leg.appendChild(Object.assign(document.createElement('span'),{innerHTML:'&nbsp;|&nbsp;'}));
+['spawn','message','task_assign'].forEach(k=>{const s=document.createElement('span');s.innerHTML=`<i style="background:${EDGE_COLOR[k]}"></i>${k}`;leg.appendChild(s)});
+
+// ---- tabs ----
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+b.dataset.tab).classList.add('active');
+  if(b.dataset.tab==='topo' && network) setTimeout(()=>network.redraw(),30);
+  if(b.dataset.tab==='seq') renderSeq();
+}));
+
+// ---- topology (vis-network) ----
+let network=null;
+function renderTopo(){
+  const nodes = P.nodes.map(n=>({
+    id:n.id, label:n.role,
+    group:n.kind, shape: n.kind==='leader'?'diamond':'dot',
+    color:{background:n.color,border:VERDICT_BORDER[n.verdict]||'#64748b',highlight:{background:n.color,border:VERDICT_BORDER[n.verdict]}},
+    size: n.kind==='leader'?22: 10+Math.min(20,Math.sqrt(n.step_count)*1.6),
+    font:{color:'#e2e8f0',size:n.kind==='leader'?16:13,multi:'md'},
+    title:`${n.role}\nsteps=${n.step_count} transcripts=${n.transcript_count}\ntokens=${n.tokens.toLocaleString()} errors=${n.error_count} final=${n.has_final_text} verdict=${n.verdict}`
+  }));
+  const edges = P.edges.map(e=>({
+    from:e.src,to:e.dst,
+    width: 1+Math.min(8,e.count), color:{color:EDGE_COLOR[e.kind]||'#475569',opacity:0.7,highlight:EDGE_COLOR[e.kind]},
+    arrows:'to', label: e.kind==='message'? e.count:'', font:{size:10,color:'#94a3b8'},
+    smooth:{type:'curvedCW',roundness:0.15}, title:`${e.kind} x${e.count}`
+  }));
+  network = new vis.Network(document.getElementById('topo'),{nodes:new vis.DataSet(nodes),edges:new vis.DataSet(edges)},
+    {layout:{improvedLayout:true},physics:{stabilization:true,barnesHut:{gravitationalConstant:-8000}},interaction:{hover:true}});
+  network.on('click',p=>{if(p.nodes.length){selectNode(p.nodes[0])}});
+}
+if(window.vis) renderTopo(); else document.getElementById('topo').innerHTML='<div class="muted" style="padding:20px">vis-network CDN 加载失败（离线？）。其余面板仍可用。</div>';
+
+// ---- steps drill-down ----
+const nodeSel=document.getElementById('step-node');
+P.nodes.forEach(n=>{const o=document.createElement('option');o.value=n.id;
+  o.textContent=`${n.role} (${n.kind}, ${n.step_count} steps, ${n.transcript_count} transcript)`;nodeSel.appendChild(o)});
+nodeSel.addEventListener('change',()=>selectNode(nodeSel.value));
+let currentNode=null;
+function selectNode(id){
+  currentNode=id; document.getElementById('tab-steps').classList.add('active');
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x.dataset.tab==='steps'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-steps').classList.add('active');
+  nodeSel.value=id;
+  const nd=P.nodes.find(n=>n.id===id);
+  document.getElementById('step-info').textContent=nd?`transcripts=${nd.transcript_count} errors=${nd.error_count} tokens=${nd.tokens.toLocaleString()} verdict=${nd.verdict}`:'';
+  const steps=P.steps_by_node[id]||[];
+  const box=document.getElementById('steps-list');
+  box.innerHTML = steps.length?'':'<div class="muted">无步骤</div>';
+  steps.forEach(s=>{
+    const d=document.createElement('details');d.className='step';
+    const sym=s.has_error?'<span class="errmark">⚠</span> ':'';
+    const tools=s.tools.map(t=>`<div class="tool"><span class="nm">${t.name}</span> <span class="muted">${escapeHtml(t.args)}</span></div>`).join('');
+    const obs=s.obs.map(o=>`<div class="${o.is_error?'errmark':'muted'}">▸ ${o.is_error?'[ERROR] ':''}${escapeHtml(o.preview)}</div>`).join('');
+    const reason=s.reasoning?`<div class="muted"><b>reasoning:</b><pre>${escapeHtml(s.reasoning)}</pre></div>`:'';
+    d.innerHTML=`<summary>${sym}<b>#${s.step_id}</b> [${s.source}] ${escapeHtml((s.text||'').slice(0,110))} ${s.tools.length?`<span class="chip">${s.tools.map(t=>t.name).join(', ')}</span>`:''}</summary>
+      <div class="body"><pre>${escapeHtml(s.text||'')}</pre>${reason}${tools||obs?'<div style="margin-top:6px">'+tools+obs+'</div>':''}</div>`;
+    box.appendChild(d);
+  });
+}
+function escapeHtml(s){return (s==null?'':String(s)).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+
+// ---- timeline (Gantt) ----
+(function(){
+  const t0=Date.parse(P.meta.span_first), t1=Date.parse(P.meta.span_last), span=t1-t0||1;
+  const box=document.getElementById('timeline');
+  const leader=P.nodes.filter(n=>n.kind==='leader');
+  const subs=P.nodes.filter(n=>n.kind!=='leader').sort((a,b)=>(Date.parse(a.active_start))-Date.parse(b.active_start));
+  [...leader,...subs].forEach(n=>{
+    const a=Date.parse(n.active_start), b=Date.parse(n.active_end);
+    if(isNaN(a)||isNaN(b))return;
+    const left=(a-t0)/span*100, w=Math.max(0.5,(b-a)/span*100);
+    const row=document.createElement('div');row.className='tl-row';
+    row.innerHTML=`<div class="tl-label">${n.role}</div><div class="tl-track"><div class="tl-bar" style="left:${left}%;width:${w}%;background:${n.color};border:1px solid ${VERDICT_BORDER[n.verdict]||'#475569'}" title="${n.active_start} → ${n.active_end} (${((b-a)/60000).toFixed(1)} min)\nsteps=${n.step_count} errors=${n.error_count}"></div></div>`;
+    row.querySelector('.tl-bar').addEventListener('click',()=>selectNode(n.id));
+    box.appendChild(row);
+  });
+  const ax=document.createElement('div');ax.className='tl-axis';
+  ax.innerHTML=`<div></div><div style="position:relative"><span style="position:absolute;left:0">${new Date(t0).toLocaleTimeString()}</span><span style="position:absolute;right:0">${new Date(t1).toLocaleTimeString()}</span></div>`;
+  box.appendChild(ax);
+})();
+
+// ---- eval table ----
+(function(){
+  const dimSel=document.getElementById('f-dim');
+  P.dimensions.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;dimSel.appendChild(o)});
+  const body=document.getElementById('eval-body');
+  function render(){
+    const fo=document.getElementById('f-outcome').value, fd=dimSel.value, ft=document.getElementById('f-text').value.toLowerCase();
+    body.innerHTML='';
+    P.checks.forEach(c=>{
+      if(fo && c.outcome!==fo)return;
+      if(fd && c.dimension!==fd)return;
+      if(ft && !(c.id.toLowerCase().includes(ft)||c.title.toLowerCase().includes(ft)||c.tags.join(' ').toLowerCase().includes(ft)))return;
+      const tr=document.createElement('tr');
+      const ev=c.evidence.length?'<span class="muted">'+c.evidence.map(e=>`[${e.ref_kind||''}${e.role?'/'+e.role:''}${e.step_id?'@'+e.step_id:''}]`).join(' ')+'</span>':'';
+      const met=c.metric?'<div class="muted">'+escapeHtml(JSON.stringify(c.metric))+'</div>':'';
+      const rub=c.rubric?`<div class="muted"><b>rubric:</b> ${escapeHtml(c.rubric)}</div>`:'';
+      const subj=c.kind==='subjective'?annotHtml(c):'';
+      tr.innerHTML=`<td>${OUT_SYMBOL[c.outcome]||''}</td><td><b>${c.id}</b><br><span class="muted">${c.tags.map(t=>`<span class="chip">${t}</span>`).join('')}</span></td><td>${c.dimension}</td><td>${escapeHtml(c.title)}<div class="muted">${escapeHtml(c.description)}</div></td><td><span class="badge ${OUT_CLASS[c.outcome]||''}">${c.outcome}</span></td><td>${c.severity}</td><td>${escapeHtml(c.explanation||'')}${ev}${met}${rub}${subj}</td>`;
+      body.appendChild(tr);
+    });
+    if(!body.children.length)body.innerHTML='<tr><td colspan="7" class="muted">无匹配检查点</td></tr>';
+  }
+  function annotHtml(c){
+    const cur=(P.annotations[c.id]&&P.annotations[c.id].outcome)||'';
+    return `<div class="annot" data-id="${c.id}"><b>主观标注:</b> `+
+      ['pass','warn','fail','not_applicable'].map(o=>`<label><input type="radio" name="a-${c.id}" value="${o}" ${cur===o?'checked':''}> ${OUT_SYMBOL[o]}${o==='not_applicable'?'NA':o}</label>`).join('')+
+      ` <input class="anote" data-id="${c.id}" placeholder="备注…" value="${escapeHtml((P.annotations[c.id]||{}).explanation||'')}" style="background:#0b1426;color:#e2e8f0;border:1px solid #1e293b;border-radius:5px;padding:3px 6px;font-size:12px;width:220px"></div>`;
+  }
+  document.getElementById('f-outcome').addEventListener('change',render);
+  dimSel.addEventListener('change',render);
+  document.getElementById('f-text').addEventListener('input',render);
+  body.addEventListener('change',e=>{
+    const t=e.target;
+    if(t.type==='radio'&&t.name&&t.name.startsWith('a-')){const id=t.name.slice(2);(P.annotations[id]=P.annotations[id]||{}).outcome=t.value;saveLocal();render();}
+    if(t.classList.contains('anote')){(P.annotations[t.dataset.id]=P.annotations[t.dataset.id]||{}).explanation=t.value;saveLocal();}
+  });
+  document.getElementById('export-annot').addEventListener('click',()=>{
+    const blob=new Blob([JSON.stringify(P.annotations,null,2)],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`annotations-${P.meta.session_id}.json`;a.click();
+  });
+  render();
+})();
+function saveLocal(){try{localStorage.setItem('annot-'+P.meta.session_id,JSON.stringify(P.annotations))}catch(e){}}
+
+// ---- conclusion / role / task panels ----
+(function(){
+  const cl=document.getElementById('conclusion-list');
+  (P.conclusion||[]).forEach(c=>{
+    const o=c.verdict||'pending';
+    const div=document.createElement('div');div.style.marginBottom='5px';
+    div.innerHTML=`<span class="badge ${OUT_CLASS[o]||''}">${OUT_SYMBOL[o]||'?'} ${o}</span> <b>${c.angle}</b> <span class="muted">${escapeHtml(c.question)}</span><div class="muted" style="margin-left:8px">${escapeHtml((c.summary||'').slice(0,180))}</div>`;
+    cl.appendChild(div);
+  });
+  const rl=document.getElementById('role-list');
+  (P.role_evals||[]).forEach(r=>{
+    const rec=r.executions.filter(e=>e.recovered).length;
+    const j=r.judgement;
+    const dims=j&&j.dimension_scores?j.dimension_scores.map(d=>`${d.id}:${d.score}`).join(' '):'';
+    const div=document.createElement('div');div.style.marginBottom='8px';div.style.borderBottom='1px solid var(--line)';div.style.paddingBottom='5px';
+    div.innerHTML=`<span class="role-dot" style="background:${(P.nodes.find(n=>n.id===r.role)||{}).color||'#888'}"></span><b>${r.role}</b>
+      <span class="badge ${OUT_CLASS[r.completion]||''}">完成:${r.completion}</span>
+      <span class="badge ${OUT_CLASS[r.error_profile]||''}">错误:${r.error_profile}</span>
+      <span class="muted">churn=${r.churn} steps=${r.step_count} errs=${r.total_errors} 工具(ok/fail)=${r.tool_success}/${r.tool_failure} 自愈=${rec}/${r.churn}</span>`
+      +(j?(j.error?`<div class="errmark">judge: ${escapeHtml(j.error)}</div>`:
+        `<div class="muted">judge: passed=${j.passed} conf=${j.confidence} ${dims}</div>
+         <div class="muted">+ ${escapeHtml((j.strengths||[]).join(' | '))}</div>
+         <div class="errmark">− ${escapeHtml((j.weaknesses||[]).join(' | '))}</div>`):'<div class="muted">judge: pending (运行 --judge)</div>');
+    rl.appendChild(div);
+  });
+  const tl=document.getElementById('task-list');
+  (P.task_evals||[]).forEach(t=>{
+    const kp=t.keypoints.map(k=>`<span class="badge ${OUT_CLASS[k.outcome]||'b-na'}" title="${escapeHtml(k.description)}">${k.id.split('.').pop()}:${k.outcome}</span>`).join(' ');
+    const div=document.createElement('div');div.style.marginBottom='8px';div.style.borderBottom='1px solid var(--line)';div.style.paddingBottom='5px';
+    div.innerHTML=`<span class="badge ${OUT_CLASS[t.completion]||''}">${t.completion}</span> <b>#${t.task_id}</b> <span class="muted">${escapeHtml(t.subject.slice(0,42))}</span> <span class="muted">[${t.final_status}] owner=${t.owner}</span><div style="margin-top:3px">${kp}</div>`;
+    tl.appendChild(div);
+  });
+})();
+
+// ---- sequence diagram (swimlanes) ----
+const SEQ_COLOR = {spawn:'#38bdf8', message:'#a78bfa', task:'#34d399', error:'#ef4444'};
+function renderSeq(){
+  const lanes=P.lanes||[], events=(P.seq_events||[]).slice();
+  const want=k=>document.querySelector(`.seqf[value="${k}"]`)?.checked;
+  const shown=events.filter(e=>want(e.kind));
+  document.getElementById('seq-count').textContent=`${shown.length}/${events.length} 事件`;
+  const GUT=92, topPad=64, rowH=24;
+  const W=Math.max(820, GUT+lanes.length*170);
+  const laneW=(W-GUT)/lanes.length;
+  const xOf=id=>{const i=lanes.indexOf(id);return i<0?null:GUT+(i+0.5)*laneW;};
+  const H=topPad+Math.max(1,shown.length)*rowH+30;
+  const fmtTs=t=>{try{return t?new Date(t).toLocaleTimeString():''}catch(e){return ''}};
+  let s=`<svg width="${W}" height="${H}" style="display:block" font-family="monospace">`;
+  s+=`<defs><marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94a3b8"/></marker></defs>`;
+  // lane headers + lifelines
+  lanes.forEach((l,i)=>{const x=GUT+(i+0.5)*laneW;const nd=P.nodes.find(n=>n.id===l);
+    s+=`<line x1="${x}" y1="40" x2="${x}" y2="${H-10}" stroke="#1e293b" stroke-dasharray="4 5"/>`;
+    s+=`<rect x="${x-laneW/2+4}" y="6" width="${laneW-8}" height="30" rx="6" fill="#0b1426" stroke="#1e293b"/>`;
+    s+=`<circle cx="${x-laneW/2+16}" cy="21" r="5" fill="${nd?nd.color:'#888'}"/>`;
+    s+=`<text x="${x}" y="25" text-anchor="middle" fill="#e2e8f0" font-size="12">${l}</text>`;
+  });
+  // events
+  shown.forEach((e,idx)=>{const y=topPad+idx*rowH;
+    s+=`<text x="6" y="${y+4}" fill="#64748b" font-size="10">${fmtTs(e.ts)}</text>`;
+    const c=SEQ_COLOR[e.kind]||'#94a3b8';
+    if(e.from && e.to && e.from!==e.to){
+      const xf=xOf(e.from), xt=xOf(e.to);
+      if(xf!=null&&xt!=null){
+        const dir=xt>xf?1:-1;
+        s+=`<line x1="${xf+dir*6}" y1="${y}" x2="${xt-dir*6}" y2="${y}" stroke="${c}" stroke-width="${e.kind==='spawn'?1.5:2}" marker-end="url(#ah)" opacity="0.85" class="seq-ev" data-i="${idx}" style="cursor:pointer"/>`;
+        const mx=(xf+xt)/2;
+        s+=`<text x="${mx}" y="${y-5}" text-anchor="middle" fill="${c}" font-size="10" class="seq-ev" data-i="${idx}" style="cursor:pointer">${escapeHtml((e.label||e.kind).slice(0,22))}</text>`;
+      }
+    } else {
+      // self event (error / task-kickoff) → marker on lane
+      const x=xOf(e.role||e.to)||GUT+20;
+      s+=`<circle cx="${x}" cy="${y}" r="5" fill="${c}" class="seq-ev" data-i="${idx}" style="cursor:pointer"/>`;
+      s+=`<text x="${x+9}" y="${y+4}" fill="${c}" font-size="10" class="seq-ev" data-i="${idx}" style="cursor:pointer">${escapeHtml((e.label||e.kind).slice(0,26))}</text>`;
+    }
+  });
+  s+=`</svg>`;
+  const box=document.getElementById('seq-svg'); box.innerHTML=s;
+  const det=document.getElementById('seq-detail');
+  box.querySelectorAll('.seq-ev').forEach(el=>el.addEventListener('click',()=>{
+    const e=shown[+el.getAttribute('data-i')]; if(!e)return;
+    det.style.display='block';
+    det.innerHTML=`<b style="color:${SEQ_COLOR[e.kind]}">${e.kind}</b> ${e.from||'∅'} → ${e.to||'∅'} <span class="muted">${fmtTs(e.ts)}</span>
+      <pre style="margin-top:6px;white-space:pre-wrap">${escapeHtml(e.detail||'(no detail)')}${e.error?'<br><span style="color:#ef4444">ERR: '+escapeHtml(e.error)+'</span>':''}</pre>`;
+  }));
+}
+document.querySelectorAll('.seqf').forEach(c=>c.addEventListener('change',renderSeq));
+
+// ---- raw data ----
+document.getElementById('raw-json').textContent=JSON.stringify({meta:P.meta,stats:P.stats,tasks:P.tasks},null,2);
+</script>
+</body>
+</html>
