@@ -1,0 +1,19 @@
+{
+  "sessions": [
+    {
+      "session_id": "64d2f445-6025-4a5f-8a2a-77cefd001743",
+      "team_name": "harbor-research",
+      "pattern": "mapreduce",
+      "health": 72.7,
+      "score_counts": {
+        "pass": 14,
+        "warn": 4,
+        "fail": 4,
+        "not_applicable": 0,
+        "pending": 3
+      },
+      "source_path": "C:\\Users\\lukeaxu\\.claude\\projects\\D--github-harbor\\64d2f445-6025-4a5f-8a2a-77cefd001743.jsonl",
+      "captured_at": "2026-06-23T17:07:00.462813+00:00"
+    }
+  ]
+}

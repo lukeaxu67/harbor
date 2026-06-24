@@ -1,0 +1,1413 @@
+{
+  "session_id": "64d2f445-6025-4a5f-8a2a-77cefd001743",
+  "team_name": "harbor-research",
+  "pattern": "mapreduce",
+  "reduce_quality": "partial",
+  "checks": [
+    {
+      "id": "S1",
+      "dimension": "structural",
+      "title": "Team created",
+      "description": "TeamCreate called with a team name.",
+      "kind": "objective",
+      "severity": "critical",
+      "tags": [
+        "team",
+        "leader"
+      ],
+      "auto": true,
+      "outcome": "pass",
+      "explanation": "Team created via TeamCreate (team_name='harbor-research')",
+      "evidence": [
+        {
+          "snippet": "team_name=harbor-research",
+          "ref_kind": "team"
+        }
+      ],
+      "metric": {
+        "team_name": "harbor-research"
+      },
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "S2",
+      "dimension": "structural",
+      "title": "Every spawned role has a transcript",
+      "description": "Each Agent-spawned role produced >=1 subagent transcript.",
+      "kind": "objective",
+      "severity": "major",
+      "tags": [
+        "spawn",
+        "churn"
+      ],
+      "auto": true,
+      "outcome": "pass",
+      "explanation": "5 role(s) have transcripts; spawned=['agents-env-researcher', 'arch-researcher', 'benchmarks-researcher', 'cli-researcher', 'infra-researcher']",
+      "evidence": [],
+      "metric": {
+        "spawned_roles": [
+          "agents-env-researcher",
+          "arch-researcher",
+          "benchmarks-researcher",
+          "cli-researcher",
+          "infra-researcher"
+        ],
+        "roles_with_transcripts": [
+          "agents-env-researcher",
+          "arch-researcher",
+          "benchmarks-researcher",
+          "cli-researcher",
+          "infra-researcher"
+        ]
+      },
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "S3",
+      "dimension": "structural",
+      "title": "Valid role types",
+      "description": "All subagents carry a non-empty agentType.",
+      "kind": "objective",
+      "severity": "minor",
+      "tags": [
+        "role"
+      ],
+      "auto": true,
+      "outcome": "pass",
+      "explanation": "role types: ['agents-env-researcher', 'arch-researcher', 'benchmarks-researcher', 'cli-researcher', 'infra-researcher']",
+      "evidence": [],
+      "metric": {
+        "roles": [
+          "agents-env-researcher",
+          "arch-researcher",
+          "benchmarks-researcher",
+          "cli-researcher",
+          "infra-researcher"
+        ]
+      },
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "E1",
+      "dimension": "execution",
+      "title": "Teammates produced final text",
+      "description": "Every teammate has a final agent text turn.",
+      "kind": "objective",
+      "severity": "minor",
+      "tags": [
+        "output"
+      ],
+      "auto": true,
+      "outcome": "pass",
+      "explanation": "16/16 teammates produced a final text turn",
+      "evidence": [],
+      "metric": {
+        "missing_final_text": []
+      },
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "E2",
+      "dimension": "execution",
+      "title": "No transcript step blow-up",
+      "description": "No transcript exceeds 200 steps.",
+      "kind": "objective",
+      "severity": "minor",
+      "tags": [
+        "steps"
+      ],
+      "auto": true,
+      "outcome": "pass",
+      "explanation": "max transcript steps = 40 (threshold 200) on team-lead",
+      "evidence": [
+        {
+          "agent_id": "leader",
+          "role": "team-lead"
+        }
+      ],
+      "metric": {
+        "max_steps": 40,
+        "threshold": 200
+      },
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "E3",
+      "dimension": "execution",
+      "title": "Per-agent tool errors bounded",
+      "description": "No agent exceeds 10 tool errors.",
+      "kind": "objective",
+      "severity": "major",
+      "tags": [
+        "error"
+      ],
+      "auto": true,
+      "outcome": "warn",
+      "explanation": "tool errors: 10 total; per-role={'agents-env-researcher': 1, 'infra-researcher': 1, 'arch-researcher': 0, 'benchmarks-researcher': 7, 'cli-researcher': 1}; threshold=10/agent",
+      "evidence": [],
+      "metric": {
+        "total": 10,
+        "per_role": {
+          "agents-env-researcher": 1,
+          "infra-researcher": 1,
+          "arch-researcher": 0,
+          "benchmarks-researcher": 7,
+          "cli-researcher": 1
+        },
+        "threshold": 10
+      },
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "E4",
+      "dimension": "execution",
+      "title": "Leader final text present",
+      "description": "Leader produced a final text turn.",
+      "kind": "objective",
+      "severity": "info",
+      "tags": [
+        "leader"
+      ],
+      "auto": true,
+      "outcome": "pass",
+      "explanation": "leader produced a final text turn",
+      "evidence": [],
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "C1",
+      "dimension": "coordination",
+      "title": "Task closure",
+      "description": "All shared-list tasks reached 'completed'.",
+      "kind": "objective",
+      "severity": "critical",
+      "tags": [
+        "task-lifecycle"
+      ],
+      "auto": true,
+      "outcome": "fail",
+      "explanation": "task closure: 0/5 completed, 5 deleted",
+      "evidence": [
+        {
+          "snippet": "#1 deleted: Research core architecture & execution l",
+          "ref_kind": "task"
+        },
+        {
+          "snippet": "#2 deleted: Research agents & environment backends",
+          "ref_kind": "task"
+        },
+        {
+          "snippet": "#3 deleted: Research the CLI & command surface",
+          "ref_kind": "task"
+        },
+        {
+          "snippet": "#4 deleted: Research benchmarks, verifier, metrics &",
+          "ref_kind": "task"
+        },
+        {
+          "snippet": "#5 deleted: Research web apps, storage, packages & C",
+          "ref_kind": "task"
+        }
+      ],
+      "metric": {
+        "completed": 0,
+        "deleted": 5,
+        "total": 5
+      },
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "C2",
+      "dimension": "coordination",
+      "title": "No orphan messages/spawns",
+      "description": "Every message/spawn target resolves to a node.",
+      "kind": "objective",
+      "severity": "minor",
+      "tags": [
+        "message"
+      ],
+      "auto": true,
+      "outcome": "pass",
+      "explanation": "no orphan targets",
+      "evidence": [],
+      "metric": {
+        "orphans": []
+      },
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "C3",
+      "dimension": "coordination",
+      "title": "No SendMessage errors",
+      "description": "SendMessage calls did not error.",
+      "kind": "objective",
+      "severity": "major",
+      "tags": [
+        "message-error"
+      ],
+      "auto": true,
+      "outcome": "fail",
+      "explanation": "5 SendMessage error(s) (e.g. missing 'summary')",
+      "evidence": [
+        {
+          "step_id": 22,
+          "role": "arch-researcher",
+          "snippet": "<tool_use_error>summary is required when message is a string</tool_use_error>",
+          "ref_kind": "message-error"
+        },
+        {
+          "step_id": 22,
+          "role": "agents-env-researcher",
+          "snippet": "<tool_use_error>summary is required when message is a string</tool_use_error>",
+          "ref_kind": "message-error"
+        },
+        {
+          "step_id": 22,
+          "role": "cli-researcher",
+          "snippet": "<tool_use_error>summary is required when message is a string</tool_use_error>",
+          "ref_kind": "message-error"
+        },
+        {
+          "step_id": 22,
+          "role": "benchmarks-researcher",
+          "snippet": "<tool_use_error>summary is required when message is a string</tool_use_error>",
+          "ref_kind": "message-error"
+        },
+        {
+          "step_id": 22,
+          "role": "infra-researcher",
+          "snippet": "<tool_use_error>summary is required when message is a string</tool_use_error>",
+          "ref_kind": "message-error"
+        }
+      ],
+      "metric": {
+        "count": 5
+      },
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "C4",
+      "dimension": "coordination",
+      "title": "Clean team cleanup",
+      "description": "TeamDelete called exactly once.",
+      "kind": "objective",
+      "severity": "minor",
+      "tags": [
+        "shutdown"
+      ],
+      "auto": true,
+      "outcome": "warn",
+      "explanation": "TeamDelete called 4 times (shutdown churn)",
+      "evidence": [],
+      "metric": {
+        "count": 4
+      },
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "C5",
+      "dimension": "coordination",
+      "title": "Leader delegation discipline",
+      "description": "Leader delegated rather than doing the work itself.",
+      "kind": "subjective",
+      "severity": "major",
+      "tags": [
+        "leader",
+        "delegation"
+      ],
+      "auto": false,
+      "outcome": "pending",
+      "evidence": [],
+      "rubric": "Does the leader avoid doing research/reading/writing itself and instead delegate to teammates? pass = leader only orchestrates; warn = minor self-work; fail = leader did core work itself.",
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "O1",
+      "dimension": "outcome",
+      "title": "Synthesis present",
+      "description": "A reduce/synthesis step was produced.",
+      "kind": "objective",
+      "severity": "major",
+      "tags": [
+        "reduce"
+      ],
+      "auto": true,
+      "outcome": "warn",
+      "explanation": "reduce/synthesis quality = partial",
+      "evidence": [],
+      "metric": {
+        "reduce_quality": "partial"
+      },
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "O2",
+      "dimension": "outcome",
+      "title": "Domain coverage in synthesis",
+      "description": "Synthesis references all tasked domains.",
+      "kind": "objective",
+      "severity": "major",
+      "tags": [
+        "reduce",
+        "coverage"
+      ],
+      "auto": true,
+      "outcome": "pass",
+      "explanation": "coverage 5/5 in longest leader turn",
+      "evidence": [],
+      "metric": {
+        "covered": [
+          "arch-researcher",
+          "cli-researcher",
+          "agents-env-researcher",
+          "benchmarks-researcher",
+          "infra-researcher"
+        ],
+        "missing": [],
+        "synthesis_len": 6823
+      },
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "O3",
+      "dimension": "outcome",
+      "title": "Synthesis quality",
+      "description": "Quality of the final synthesis.",
+      "kind": "subjective",
+      "severity": "critical",
+      "tags": [
+        "reduce",
+        "quality"
+      ],
+      "auto": false,
+      "outcome": "pending",
+      "evidence": [],
+      "rubric": "Structure, cites teammate findings, no hallucination, actionable. pass = strong; warn = thin; fail = absent/bad.",
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "O4",
+      "dimension": "outcome",
+      "title": "Research depth per domain",
+      "description": "Depth and correctness of each domain's findings.",
+      "kind": "subjective",
+      "severity": "major",
+      "tags": [
+        "depth"
+      ],
+      "auto": false,
+      "outcome": "pending",
+      "evidence": [],
+      "rubric": "Per-role: did the researcher go beyond surface reading, cite real code/paths, answer the assigned question? pass/warn/fail.",
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "F1",
+      "dimension": "efficiency",
+      "title": "Token cost reported",
+      "description": "Total token usage is reported (informational).",
+      "kind": "objective",
+      "severity": "info",
+      "tags": [
+        "token"
+      ],
+      "auto": true,
+      "outcome": "pass",
+      "explanation": "total tokens (prompt+completion+cached): 17,625,364 (prompt 1,993,785, completion 197,915, cached 15,433,664)",
+      "evidence": [],
+      "metric": {
+        "prompt": 1993785,
+        "completion": 197915,
+        "cached": 15433664,
+        "all": 17625364
+      },
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "F2",
+      "dimension": "efficiency",
+      "title": "Worker parallelism",
+      "description": "Workers ran in overlapping windows.",
+      "kind": "objective",
+      "severity": "minor",
+      "tags": [
+        "parallel"
+      ],
+      "auto": true,
+      "outcome": "pass",
+      "explanation": "workers ran with overlapping active windows",
+      "evidence": [],
+      "metric": {
+        "worker_parallel": true
+      },
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "F3",
+      "dimension": "efficiency",
+      "title": "Low transcript churn",
+      "description": "Few transcripts per role (low retry churn).",
+      "kind": "objective",
+      "severity": "major",
+      "tags": [
+        "churn"
+      ],
+      "auto": true,
+      "outcome": "fail",
+      "explanation": "max transcripts per role = 4 ({'agents-env-researcher': 3, 'infra-researcher': 3, 'arch-researcher': 4, 'benchmarks-researcher': 3, 'cli-researcher': 3})",
+      "evidence": [],
+      "metric": {
+        "max": 4,
+        "by_role": {
+          "agents-env-researcher": 3,
+          "infra-researcher": 3,
+          "arch-researcher": 4,
+          "benchmarks-researcher": 3,
+          "cli-researcher": 3
+        }
+      },
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "R1",
+      "dimension": "robustness",
+      "title": "Low error rate",
+      "description": "Tool error rate is low.",
+      "kind": "objective",
+      "severity": "major",
+      "tags": [
+        "error"
+      ],
+      "auto": true,
+      "outcome": "pass",
+      "explanation": "error rate = 32/702 = 4.6%",
+      "evidence": [],
+      "metric": {
+        "errors": 32,
+        "tool_calls": 702,
+        "rate": 0.0456
+      },
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "R2",
+      "dimension": "robustness",
+      "title": "No manual intervention",
+      "description": "No TaskStop / repeated TeamDelete.",
+      "kind": "objective",
+      "severity": "minor",
+      "tags": [
+        "intervention"
+      ],
+      "auto": true,
+      "outcome": "warn",
+      "explanation": "manual interventions: TaskStop=['arch-researcher@harbor-research'], TeamDelete=4",
+      "evidence": [
+        {
+          "snippet": "arch-researcher@harbor-research",
+          "ref_kind": "taskstop"
+        }
+      ],
+      "metric": {
+        "taskstop": [
+          "arch-researcher@harbor-research"
+        ],
+        "teamdelete": 4
+      },
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "R3",
+      "dimension": "robustness",
+      "title": "Clean termination",
+      "description": "Session ended cleanly (not idle, tasks done, 1 cleanup).",
+      "kind": "objective",
+      "severity": "critical",
+      "tags": [
+        "termination"
+      ],
+      "auto": true,
+      "outcome": "fail",
+      "explanation": "unclean termination: leader ended on an idle/standby message; tasks not all completed (0/5); TeamDelete called 4x",
+      "evidence": [
+        {
+          "role": "team-lead",
+          "snippet": "Still just an idle ping from arch-researcher — no action needed (idle = standing by, not an error). Nothing's changed.\n\nI'm holding for your call on the two ope",
+          "ref_kind": "termination"
+        }
+      ],
+      "metric": {
+        "idle_end": true,
+        "tasks_completed": false
+      },
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "A1",
+      "dimension": "atif",
+      "title": "ATIF Pydantic validity",
+      "description": "Trajectory validates via harbor models.",
+      "kind": "objective",
+      "severity": "info",
+      "tags": [
+        "atif"
+      ],
+      "auto": true,
+      "outcome": "pass",
+      "explanation": "Trajectory validates via harbor Pydantic models",
+      "evidence": [],
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "A2",
+      "dimension": "atif",
+      "title": "ATIF schema integrity",
+      "description": "Unique trajectory_ids, sequential step_ids, source_call_id integrity.",
+      "kind": "objective",
+      "severity": "info",
+      "tags": [
+        "atif"
+      ],
+      "auto": true,
+      "outcome": "pass",
+      "explanation": "16 unique / 16 embedded; all trajectories sequential from 1; 0 dangling source_call_id reference(s)",
+      "evidence": [],
+      "dimension_scores": [],
+      "scope": "session"
+    },
+    {
+      "id": "A3",
+      "dimension": "atif",
+      "title": "ATIF refs resolvable",
+      "description": "SubagentTrajectoryRefs resolve to embedded trajectories.",
+      "kind": "objective",
+      "severity": "info",
+      "tags": [
+        "atif"
+      ],
+      "auto": true,
+      "outcome": "pass",
+      "explanation": "16 embedded; 0 unresolved ref(s)",
+      "evidence": [],
+      "dimension_scores": [],
+      "scope": "session"
+    }
+  ],
+  "role_evals": [
+    {
+      "role": "agents-env-researcher",
+      "executions": [
+        {
+          "transcript_id": "a0177109069fe722f",
+          "attempt": 1,
+          "step_count": 12,
+          "has_final_text": true,
+          "error_count": 1,
+          "tool_calls": 36,
+          "tool_success": 35,
+          "tool_failure": 1,
+          "recovered": true,
+          "first_ts": "2026-06-23T16:11:48.221Z",
+          "last_ts": "2026-06-23T16:14:08.268Z"
+        },
+        {
+          "transcript_id": "a5a4e237ad897601d",
+          "attempt": 2,
+          "step_count": 14,
+          "has_final_text": true,
+          "error_count": 1,
+          "tool_calls": 36,
+          "tool_success": 35,
+          "tool_failure": 1,
+          "recovered": true,
+          "first_ts": "2026-06-23T16:11:48.221Z",
+          "last_ts": "2026-06-23T16:15:51.649Z"
+        },
+        {
+          "transcript_id": "a66dc5fa1523437c5",
+          "attempt": 3,
+          "step_count": 17,
+          "has_final_text": true,
+          "error_count": 1,
+          "tool_calls": 37,
+          "tool_success": 36,
+          "tool_failure": 1,
+          "recovered": true,
+          "first_ts": "2026-06-23T16:11:48.221Z",
+          "last_ts": "2026-06-23T16:22:07.477Z"
+        }
+      ],
+      "completion": "pass",
+      "error_profile": "pass",
+      "step_count": 43,
+      "total_errors": 3,
+      "tool_success": 106,
+      "tool_failure": 3,
+      "churn": 3,
+      "tool_summary": {
+        "TaskUpdate": 6,
+        "Glob": 30,
+        "Read": 66,
+        "Grep": 3,
+        "SendMessage": 4
+      },
+      "keypoints": [
+        {
+          "id": "role.delivered",
+          "description": "Role produced a deliverable (final text)",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "pass"
+        },
+        {
+          "id": "role.errors_bounded",
+          "description": "Tool errors bounded (<10/exec) & recovered",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "pass"
+        },
+        {
+          "id": "role.depth_quality",
+          "description": "Research depth & correctness of findings (subjective)",
+          "weight": 1.0,
+          "type": "subjective",
+          "outcome": "pending"
+        }
+      ]
+    },
+    {
+      "role": "infra-researcher",
+      "executions": [
+        {
+          "transcript_id": "a18e50503482b9552",
+          "attempt": 1,
+          "step_count": 12,
+          "has_final_text": true,
+          "error_count": 0,
+          "tool_calls": 38,
+          "tool_success": 38,
+          "tool_failure": 0,
+          "recovered": false,
+          "first_ts": "2026-06-23T16:12:30.086Z",
+          "last_ts": "2026-06-23T16:14:46.405Z"
+        },
+        {
+          "transcript_id": "ae3df342ee8e920a9",
+          "attempt": 2,
+          "step_count": 10,
+          "has_final_text": true,
+          "error_count": 0,
+          "tool_calls": 38,
+          "tool_success": 38,
+          "tool_failure": 0,
+          "recovered": false,
+          "first_ts": "2026-06-23T16:12:30.086Z",
+          "last_ts": "2026-06-23T16:13:38.020Z"
+        },
+        {
+          "transcript_id": "ae8369ccadfdaf098",
+          "attempt": 3,
+          "step_count": 16,
+          "has_final_text": true,
+          "error_count": 1,
+          "tool_calls": 40,
+          "tool_success": 39,
+          "tool_failure": 1,
+          "recovered": true,
+          "first_ts": "2026-06-23T16:12:30.086Z",
+          "last_ts": "2026-06-23T16:22:07.355Z"
+        }
+      ],
+      "completion": "pass",
+      "error_profile": "pass",
+      "step_count": 38,
+      "total_errors": 1,
+      "tool_success": 115,
+      "tool_failure": 1,
+      "churn": 3,
+      "tool_summary": {
+        "Read": 63,
+        "Glob": 42,
+        "TaskUpdate": 6,
+        "SendMessage": 5
+      },
+      "keypoints": [
+        {
+          "id": "role.delivered",
+          "description": "Role produced a deliverable (final text)",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "pass"
+        },
+        {
+          "id": "role.errors_bounded",
+          "description": "Tool errors bounded (<10/exec) & recovered",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "pass"
+        },
+        {
+          "id": "role.depth_quality",
+          "description": "Research depth & correctness of findings (subjective)",
+          "weight": 1.0,
+          "type": "subjective",
+          "outcome": "pending"
+        }
+      ]
+    },
+    {
+      "role": "arch-researcher",
+      "executions": [
+        {
+          "transcript_id": "a200598d0c62bbbf3",
+          "attempt": 1,
+          "step_count": 17,
+          "has_final_text": true,
+          "error_count": 0,
+          "tool_calls": 33,
+          "tool_success": 33,
+          "tool_failure": 0,
+          "recovered": false,
+          "first_ts": "2026-06-23T16:11:36.217Z",
+          "last_ts": "2026-06-23T16:21:45.270Z"
+        },
+        {
+          "transcript_id": "a3d50d1c496237836",
+          "attempt": 2,
+          "step_count": 19,
+          "has_final_text": true,
+          "error_count": 0,
+          "tool_calls": 33,
+          "tool_success": 33,
+          "tool_failure": 0,
+          "recovered": false,
+          "first_ts": "2026-06-23T16:11:36.217Z",
+          "last_ts": "2026-06-23T16:27:28.372Z"
+        },
+        {
+          "transcript_id": "a8769f81c42816f07",
+          "attempt": 3,
+          "step_count": 15,
+          "has_final_text": true,
+          "error_count": 0,
+          "tool_calls": 33,
+          "tool_success": 33,
+          "tool_failure": 0,
+          "recovered": false,
+          "first_ts": "2026-06-23T16:11:36.217Z",
+          "last_ts": "2026-06-23T16:15:03.904Z"
+        },
+        {
+          "transcript_id": "ab85cd579d586613f",
+          "attempt": 4,
+          "step_count": 13,
+          "has_final_text": true,
+          "error_count": 0,
+          "tool_calls": 33,
+          "tool_success": 33,
+          "tool_failure": 0,
+          "recovered": false,
+          "first_ts": "2026-06-23T16:11:36.217Z",
+          "last_ts": "2026-06-23T16:13:22.712Z"
+        }
+      ],
+      "completion": "pass",
+      "error_profile": "pass",
+      "step_count": 64,
+      "total_errors": 0,
+      "tool_success": 132,
+      "tool_failure": 0,
+      "churn": 4,
+      "tool_summary": {
+        "Glob": 24,
+        "Read": 88,
+        "Grep": 12,
+        "TaskUpdate": 4,
+        "SendMessage": 4
+      },
+      "keypoints": [
+        {
+          "id": "role.delivered",
+          "description": "Role produced a deliverable (final text)",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "pass"
+        },
+        {
+          "id": "role.errors_bounded",
+          "description": "Tool errors bounded (<10/exec) & recovered",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "pass"
+        },
+        {
+          "id": "role.depth_quality",
+          "description": "Research depth & correctness of findings (subjective)",
+          "weight": 1.0,
+          "type": "subjective",
+          "outcome": "pending"
+        }
+      ]
+    },
+    {
+      "role": "benchmarks-researcher",
+      "executions": [
+        {
+          "transcript_id": "a2e1420e3b9212f38",
+          "attempt": 1,
+          "step_count": 25,
+          "has_final_text": true,
+          "error_count": 6,
+          "tool_calls": 64,
+          "tool_success": 58,
+          "tool_failure": 6,
+          "recovered": true,
+          "first_ts": "2026-06-23T16:12:18.278Z",
+          "last_ts": "2026-06-23T16:15:55.744Z"
+        },
+        {
+          "transcript_id": "a9004ccf9dcfa4086",
+          "attempt": 2,
+          "step_count": 23,
+          "has_final_text": true,
+          "error_count": 6,
+          "tool_calls": 64,
+          "tool_success": 58,
+          "tool_failure": 6,
+          "recovered": true,
+          "first_ts": "2026-06-23T16:12:18.278Z",
+          "last_ts": "2026-06-23T16:14:44.212Z"
+        },
+        {
+          "transcript_id": "ad6a2372e98a82625",
+          "attempt": 3,
+          "step_count": 29,
+          "has_final_text": true,
+          "error_count": 7,
+          "tool_calls": 66,
+          "tool_success": 59,
+          "tool_failure": 7,
+          "recovered": true,
+          "first_ts": "2026-06-23T16:12:18.278Z",
+          "last_ts": "2026-06-23T16:22:06.053Z"
+        }
+      ],
+      "completion": "pass",
+      "error_profile": "pass",
+      "step_count": 77,
+      "total_errors": 19,
+      "tool_success": 175,
+      "tool_failure": 19,
+      "churn": 3,
+      "tool_summary": {
+        "Bash": 108,
+        "TaskUpdate": 6,
+        "Read": 75,
+        "SendMessage": 5
+      },
+      "keypoints": [
+        {
+          "id": "role.delivered",
+          "description": "Role produced a deliverable (final text)",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "pass"
+        },
+        {
+          "id": "role.errors_bounded",
+          "description": "Tool errors bounded (<10/exec) & recovered",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "pass"
+        },
+        {
+          "id": "role.depth_quality",
+          "description": "Research depth & correctness of findings (subjective)",
+          "weight": 1.0,
+          "type": "subjective",
+          "outcome": "pending"
+        }
+      ]
+    },
+    {
+      "role": "cli-researcher",
+      "executions": [
+        {
+          "transcript_id": "a643ca4583b8f9d67",
+          "attempt": 1,
+          "step_count": 11,
+          "has_final_text": true,
+          "error_count": 1,
+          "tool_calls": 29,
+          "tool_success": 28,
+          "tool_failure": 1,
+          "recovered": true,
+          "first_ts": "2026-06-23T16:11:57.863Z",
+          "last_ts": "2026-06-23T16:13:46.614Z"
+        },
+        {
+          "transcript_id": "a9807fb1f718d61d1",
+          "attempt": 2,
+          "step_count": 16,
+          "has_final_text": true,
+          "error_count": 1,
+          "tool_calls": 33,
+          "tool_success": 32,
+          "tool_failure": 1,
+          "recovered": true,
+          "first_ts": "2026-06-23T16:11:57.863Z",
+          "last_ts": "2026-06-23T16:15:14.143Z"
+        },
+        {
+          "transcript_id": "af9b7d07bfb52e63e",
+          "attempt": 3,
+          "step_count": 22,
+          "has_final_text": true,
+          "error_count": 1,
+          "tool_calls": 37,
+          "tool_success": 36,
+          "tool_failure": 1,
+          "recovered": true,
+          "first_ts": "2026-06-23T16:11:57.863Z",
+          "last_ts": "2026-06-23T16:22:13.262Z"
+        }
+      ],
+      "completion": "pass",
+      "error_profile": "pass",
+      "step_count": 49,
+      "total_errors": 3,
+      "tool_success": 96,
+      "tool_failure": 3,
+      "churn": 3,
+      "tool_summary": {
+        "Read": 76,
+        "Glob": 3,
+        "Grep": 8,
+        "TaskUpdate": 3,
+        "SendMessage": 6,
+        "Bash": 2,
+        "TaskList": 1
+      },
+      "keypoints": [
+        {
+          "id": "role.delivered",
+          "description": "Role produced a deliverable (final text)",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "pass"
+        },
+        {
+          "id": "role.errors_bounded",
+          "description": "Tool errors bounded (<10/exec) & recovered",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "pass"
+        },
+        {
+          "id": "role.depth_quality",
+          "description": "Research depth & correctness of findings (subjective)",
+          "weight": 1.0,
+          "type": "subjective",
+          "outcome": "pending"
+        }
+      ]
+    }
+  ],
+  "task_evals": [
+    {
+      "task_id": "1",
+      "subject": "Research core architecture & execution lifecycle",
+      "owner": "arch-researcher",
+      "final_status": "deleted",
+      "keypoints": [
+        {
+          "id": "1.assigned",
+          "description": "Task assigned to an existing role",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "pass"
+        },
+        {
+          "id": "1.executed",
+          "description": "Owner role (arch-researcher) produced a deliverable",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "pass"
+        },
+        {
+          "id": "1.closed",
+          "description": "Task reached 'completed' in the shared list",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "fail"
+        },
+        {
+          "id": "1.quality",
+          "description": "Deliverable satisfies the task's intent (subjective)",
+          "weight": 1.0,
+          "type": "subjective",
+          "outcome": "pending"
+        }
+      ],
+      "completion": "warn",
+      "evidence": [
+        {
+          "role": "arch-researcher",
+          "snippet": "#1 deleted: Research core architecture & execution lifecycle",
+          "ref_kind": "task"
+        }
+      ]
+    },
+    {
+      "task_id": "2",
+      "subject": "Research agents & environment backends",
+      "owner": "agents-env-researcher",
+      "final_status": "deleted",
+      "keypoints": [
+        {
+          "id": "2.assigned",
+          "description": "Task assigned to an existing role",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "pass"
+        },
+        {
+          "id": "2.executed",
+          "description": "Owner role (agents-env-researcher) produced a deliverable",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "pass"
+        },
+        {
+          "id": "2.closed",
+          "description": "Task reached 'completed' in the shared list",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "fail"
+        },
+        {
+          "id": "2.quality",
+          "description": "Deliverable satisfies the task's intent (subjective)",
+          "weight": 1.0,
+          "type": "subjective",
+          "outcome": "pending"
+        }
+      ],
+      "completion": "warn",
+      "evidence": [
+        {
+          "role": "agents-env-researcher",
+          "snippet": "#2 deleted: Research agents & environment backends",
+          "ref_kind": "task"
+        }
+      ]
+    },
+    {
+      "task_id": "3",
+      "subject": "Research the CLI & command surface",
+      "owner": "cli-researcher",
+      "final_status": "deleted",
+      "keypoints": [
+        {
+          "id": "3.assigned",
+          "description": "Task assigned to an existing role",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "pass"
+        },
+        {
+          "id": "3.executed",
+          "description": "Owner role (cli-researcher) produced a deliverable",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "pass"
+        },
+        {
+          "id": "3.closed",
+          "description": "Task reached 'completed' in the shared list",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "fail"
+        },
+        {
+          "id": "3.quality",
+          "description": "Deliverable satisfies the task's intent (subjective)",
+          "weight": 1.0,
+          "type": "subjective",
+          "outcome": "pending"
+        }
+      ],
+      "completion": "warn",
+      "evidence": [
+        {
+          "role": "cli-researcher",
+          "snippet": "#3 deleted: Research the CLI & command surface",
+          "ref_kind": "task"
+        }
+      ]
+    },
+    {
+      "task_id": "4",
+      "subject": "Research benchmarks, verifier, metrics & registry",
+      "owner": "benchmarks-researcher",
+      "final_status": "deleted",
+      "keypoints": [
+        {
+          "id": "4.assigned",
+          "description": "Task assigned to an existing role",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "pass"
+        },
+        {
+          "id": "4.executed",
+          "description": "Owner role (benchmarks-researcher) produced a deliverable",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "pass"
+        },
+        {
+          "id": "4.closed",
+          "description": "Task reached 'completed' in the shared list",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "fail"
+        },
+        {
+          "id": "4.quality",
+          "description": "Deliverable satisfies the task's intent (subjective)",
+          "weight": 1.0,
+          "type": "subjective",
+          "outcome": "pending"
+        }
+      ],
+      "completion": "warn",
+      "evidence": [
+        {
+          "role": "benchmarks-researcher",
+          "snippet": "#4 deleted: Research benchmarks, verifier, metrics & registry",
+          "ref_kind": "task"
+        }
+      ]
+    },
+    {
+      "task_id": "5",
+      "subject": "Research web apps, storage, packages & CI/CD",
+      "owner": "infra-researcher",
+      "final_status": "deleted",
+      "keypoints": [
+        {
+          "id": "5.assigned",
+          "description": "Task assigned to an existing role",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "pass"
+        },
+        {
+          "id": "5.executed",
+          "description": "Owner role (infra-researcher) produced a deliverable",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "pass"
+        },
+        {
+          "id": "5.closed",
+          "description": "Task reached 'completed' in the shared list",
+          "weight": 1.0,
+          "type": "objective",
+          "outcome": "fail"
+        },
+        {
+          "id": "5.quality",
+          "description": "Deliverable satisfies the task's intent (subjective)",
+          "weight": 1.0,
+          "type": "subjective",
+          "outcome": "pending"
+        }
+      ],
+      "completion": "warn",
+      "evidence": [
+        {
+          "role": "infra-researcher",
+          "snippet": "#5 deleted: Research web apps, storage, packages & CI/CD",
+          "ref_kind": "task"
+        }
+      ]
+    }
+  ],
+  "conclusion": [
+    {
+      "angle": "goal",
+      "question": "最开始的任务完成了吗？",
+      "verdict": "warn",
+      "summary": "O1=warn: reduce/synthesis quality = partial | O2=pass: coverage 5/5 in longest leader turn | tasks closed: 0/5",
+      "evidence": []
+    },
+    {
+      "angle": "planning",
+      "question": "拆解合理吗？聚焦吗？角色边界清晰吗？(领导力)",
+      "verdict": "pass",
+      "summary": "S1=pass: Team created via TeamCreate (team_name='harbor-research') | S2=pass: 5 role(s) have transcripts; spawned=['agents-env-researcher', 'arch-researcher', 'benchmarks-researcher', 'cli-researcher', 'infra-researcher'] | S3=pass: role types: ['agents-env-researcher', 'arch-researcher', 'benchmarks-researcher', 'cli-researcher', 'infra-researcher']",
+      "evidence": []
+    },
+    {
+      "angle": "delegation",
+      "question": "活派对人了吗？交接干净吗？协调有效吗？",
+      "verdict": "fail",
+      "summary": "C1=fail: task closure: 0/5 completed, 5 deleted | C2=pass: no orphan targets | C3=fail: 5 SendMessage error(s) (e.g. missing 'summary') | C4=warn: TeamDelete called 4 times (shutdown churn)",
+      "evidence": []
+    },
+    {
+      "angle": "execution",
+      "question": "每个角色完成得怎么样？谁强谁弱？",
+      "verdict": "warn",
+      "summary": "E1=pass: 16/16 teammates produced a final text turn | E2=pass: max transcript steps = 40 (threshold 200) on team-lead | E3=warn: tool errors: 10 total; per-role={'agents-env-researcher': 1, 'infra-researcher': 1, 'arch-researcher': 0, 'benchmarks-researcher': 7, 'cli-researcher': 1}; threshold=10/agent | E4=pass: leader produced a final text turn",
+      "evidence": []
+    },
+    {
+      "angle": "robustness",
+      "question": "中途出错了吗？发现并纠正了吗？(韧性/纠错)",
+      "verdict": "fail",
+      "summary": "R1=pass: error rate = 32/702 = 4.6% | R2=warn: manual interventions: TaskStop=['arch-researcher@harbor-research'], TeamDelete=4 | R3=fail: unclean termination: leader ended on an idle/standby message; tasks not all completed (0/5); TeamDelete called 4x | recovered executions: 10; unrecovered: 0",
+      "evidence": []
+    },
+    {
+      "angle": "efficiency",
+      "question": "值得这个成本吗？(token/时间/并行/冗余)",
+      "verdict": "fail",
+      "summary": "F1=pass: total tokens (prompt+completion+cached): 17,625,364 (prompt 1,993,785, completion 197,915, cached 15,433,664) | F2=pass: workers ran with overlapping active windows | F3=fail: max transcripts per role = 4 ({'agents-env-researcher': 3, 'infra-researcher': 3, 'arch-researcher': 4, 'benchmarks-researcher': 3, 'cli-researcher': 3})",
+      "evidence": []
+    },
+    {
+      "angle": "conformance",
+      "question": "轨迹可复用/合规吗？(ATIF)",
+      "verdict": "pass",
+      "summary": "A1=pass: Trajectory validates via harbor Pydantic models | A2=pass: 16 unique / 16 embedded; all trajectories sequential from 1; 0 dangling source_call_id reference(s) | A3=pass: 16 embedded; 0 unresolved ref(s)",
+      "evidence": []
+    }
+  ],
+  "stats": {
+    "team_name": "harbor-research",
+    "leader": {
+      "steps": 40,
+      "assistant_turns": 33,
+      "tokens": {
+        "prompt": 106040,
+        "completion": 35230,
+        "cached": 2014336
+      },
+      "errors": 6,
+      "has_final_text": true
+    },
+    "subagents": {
+      "count": 16,
+      "by_role": {
+        "agents-env-researcher": 3,
+        "infra-researcher": 3,
+        "arch-researcher": 4,
+        "benchmarks-researcher": 3,
+        "cli-researcher": 3
+      },
+      "roles": 5
+    },
+    "totals": {
+      "steps": 311,
+      "tokens": {
+        "prompt": 1993785,
+        "completion": 197915,
+        "cached": 15433664,
+        "all": 17625364
+      },
+      "errors": 32,
+      "tool_calls": 702
+    },
+    "tool_hist": {
+      "Read": 371,
+      "Bash": 115,
+      "TeamCreate": 1,
+      "TaskCreate": 5,
+      "TaskUpdate": 35,
+      "Agent": 5,
+      "SendMessage": 40,
+      "Grep": 25,
+      "TeamDelete": 4,
+      "TaskStop": 1,
+      "Glob": 99,
+      "TaskList": 1
+    },
+    "messages": {
+      "leader_outgoing": 16,
+      "teammate_to_leader": 24,
+      "peer": 0,
+      "send_errors": 5
+    },
+    "spawns": 5,
+    "tasks": {
+      "total": 5,
+      "by_status": {
+        "deleted": 5
+      }
+    },
+    "teamdelete_count": 4,
+    "taskstop_targets": [
+      "arch-researcher@harbor-research"
+    ],
+    "churn": {
+      "by_role": {
+        "agents-env-researcher": 3,
+        "infra-researcher": 3,
+        "arch-researcher": 4,
+        "benchmarks-researcher": 3,
+        "cli-researcher": 3
+      },
+      "max": 4
+    },
+    "wall_clock_sec": 1248.511,
+    "worker_parallel": true,
+    "span": {
+      "first": "2026-06-23T16:07:44.389Z",
+      "last": "2026-06-23T16:28:32.900Z"
+    },
+    "pattern": "mapreduce",
+    "reduce_quality": "partial"
+  },
+  "score": {
+    "counts": {
+      "pass": 14,
+      "warn": 4,
+      "fail": 4,
+      "not_applicable": 0,
+      "pending": 3
+    },
+    "health": 72.7,
+    "scored": 22
+  },
+  "generated_at": "2026-06-23T17:44:12.072884+00:00",
+  "notes": [
+    "original_task: 使用agent team调研一下这个项目",
+    "parsed 16 subagent transcripts across 5 roles"
+  ]
+}

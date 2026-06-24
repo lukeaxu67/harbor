@@ -1,6 +1,6 @@
 # generated outputs (regenerable via `python -m team_eval.cli`)
-runs/
-sessions/
+# NOTE: runs/ and sessions/ ARE committed (example outputs + dataset index).
+# Only local user annotations are ignored.
 annotations/
 
 # python

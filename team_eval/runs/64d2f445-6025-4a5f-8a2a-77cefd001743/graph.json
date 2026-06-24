@@ -1,0 +1,417 @@
+{
+  "team_name": "harbor-research",
+  "session_id": "64d2f445-6025-4a5f-8a2a-77cefd001743",
+  "nodes": [
+    {
+      "id": "team-lead",
+      "role": "team-lead",
+      "kind": "leader",
+      "transcript_count": 1,
+      "transcript_ids": [
+        "leader"
+      ],
+      "step_count": 40,
+      "assistant_turn_count": 33,
+      "prompt_tokens": 106040,
+      "completion_tokens": 35230,
+      "cached_tokens": 2014336,
+      "active_start": "2026-06-23T16:07:44.389Z",
+      "active_end": "2026-06-23T16:28:32.900Z",
+      "has_final_text": true,
+      "error_count": 6,
+      "task_ids": []
+    },
+    {
+      "id": "agents-env-researcher",
+      "role": "agents-env-researcher",
+      "kind": "teammate",
+      "transcript_count": 3,
+      "transcript_ids": [
+        "a0177109069fe722f",
+        "a5a4e237ad897601d",
+        "a66dc5fa1523437c5"
+      ],
+      "step_count": 43,
+      "assistant_turn_count": 37,
+      "prompt_tokens": 426285,
+      "completion_tokens": 43159,
+      "cached_tokens": 2489536,
+      "active_start": "2026-06-23T16:11:48.221Z",
+      "active_end": "2026-06-23T16:22:07.477Z",
+      "has_final_text": true,
+      "error_count": 3,
+      "task_ids": [
+        "2"
+      ]
+    },
+    {
+      "id": "infra-researcher",
+      "role": "infra-researcher",
+      "kind": "teammate",
+      "transcript_count": 3,
+      "transcript_ids": [
+        "a18e50503482b9552",
+        "ae3df342ee8e920a9",
+        "ae8369ccadfdaf098"
+      ],
+      "step_count": 38,
+      "assistant_turn_count": 32,
+      "prompt_tokens": 318397,
+      "completion_tokens": 14816,
+      "cached_tokens": 1681984,
+      "active_start": "2026-06-23T16:12:30.086Z",
+      "active_end": "2026-06-23T16:22:07.355Z",
+      "has_final_text": true,
+      "error_count": 1,
+      "task_ids": [
+        "5"
+      ]
+    },
+    {
+      "id": "arch-researcher",
+      "role": "arch-researcher",
+      "kind": "teammate",
+      "transcript_count": 4,
+      "transcript_ids": [
+        "a200598d0c62bbbf3",
+        "a3d50d1c496237836",
+        "a8769f81c42816f07",
+        "ab85cd579d586613f"
+      ],
+      "step_count": 64,
+      "assistant_turn_count": 54,
+      "prompt_tokens": 559245,
+      "completion_tokens": 38985,
+      "cached_tokens": 3182656,
+      "active_start": "2026-06-23T16:11:36.217Z",
+      "active_end": "2026-06-23T16:27:28.372Z",
+      "has_final_text": true,
+      "error_count": 0,
+      "task_ids": [
+        "1"
+      ]
+    },
+    {
+      "id": "benchmarks-researcher",
+      "role": "benchmarks-researcher",
+      "kind": "teammate",
+      "transcript_count": 3,
+      "transcript_ids": [
+        "a2e1420e3b9212f38",
+        "a9004ccf9dcfa4086",
+        "ad6a2372e98a82625"
+      ],
+      "step_count": 77,
+      "assistant_turn_count": 71,
+      "prompt_tokens": 184680,
+      "completion_tokens": 35643,
+      "cached_tokens": 2930496,
+      "active_start": "2026-06-23T16:12:18.278Z",
+      "active_end": "2026-06-23T16:22:06.053Z",
+      "has_final_text": true,
+      "error_count": 19,
+      "task_ids": [
+        "4"
+      ]
+    },
+    {
+      "id": "cli-researcher",
+      "role": "cli-researcher",
+      "kind": "teammate",
+      "transcript_count": 3,
+      "transcript_ids": [
+        "a643ca4583b8f9d67",
+        "a9807fb1f718d61d1",
+        "af9b7d07bfb52e63e"
+      ],
+      "step_count": 49,
+      "assistant_turn_count": 43,
+      "prompt_tokens": 399138,
+      "completion_tokens": 30082,
+      "cached_tokens": 3134656,
+      "active_start": "2026-06-23T16:11:57.863Z",
+      "active_end": "2026-06-23T16:22:13.262Z",
+      "has_final_text": true,
+      "error_count": 3,
+      "task_ids": [
+        "3"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "src": "team-lead",
+      "dst": "arch-researcher",
+      "kind": "spawn",
+      "count": 1
+    },
+    {
+      "src": "team-lead",
+      "dst": "agents-env-researcher",
+      "kind": "spawn",
+      "count": 1
+    },
+    {
+      "src": "team-lead",
+      "dst": "cli-researcher",
+      "kind": "spawn",
+      "count": 1
+    },
+    {
+      "src": "team-lead",
+      "dst": "benchmarks-researcher",
+      "kind": "spawn",
+      "count": 1
+    },
+    {
+      "src": "team-lead",
+      "dst": "infra-researcher",
+      "kind": "spawn",
+      "count": 1
+    },
+    {
+      "src": "team-lead",
+      "dst": "arch-researcher",
+      "kind": "message",
+      "count": 4
+    },
+    {
+      "src": "team-lead",
+      "dst": "agents-env-researcher",
+      "kind": "message",
+      "count": 3
+    },
+    {
+      "src": "team-lead",
+      "dst": "cli-researcher",
+      "kind": "message",
+      "count": 3
+    },
+    {
+      "src": "team-lead",
+      "dst": "benchmarks-researcher",
+      "kind": "message",
+      "count": 3
+    },
+    {
+      "src": "team-lead",
+      "dst": "infra-researcher",
+      "kind": "message",
+      "count": 3
+    },
+    {
+      "src": "agents-env-researcher",
+      "dst": "team-lead",
+      "kind": "message",
+      "count": 4,
+      "first_ts": "2026-06-23T16:12:41.952Z",
+      "last_ts": "2026-06-23T16:22:01.163Z"
+    },
+    {
+      "src": "infra-researcher",
+      "dst": "team-lead",
+      "kind": "message",
+      "count": 5,
+      "first_ts": "2026-06-23T16:13:14.058Z",
+      "last_ts": "2026-06-23T16:22:02.216Z"
+    },
+    {
+      "src": "arch-researcher",
+      "dst": "team-lead",
+      "kind": "message",
+      "count": 4,
+      "first_ts": "2026-06-23T16:12:42.850Z",
+      "last_ts": "2026-06-23T16:12:42.850Z"
+    },
+    {
+      "src": "benchmarks-researcher",
+      "dst": "team-lead",
+      "kind": "message",
+      "count": 5,
+      "first_ts": "2026-06-23T16:13:46.741Z",
+      "last_ts": "2026-06-23T16:22:01.932Z"
+    },
+    {
+      "src": "cli-researcher",
+      "dst": "team-lead",
+      "kind": "message",
+      "count": 6,
+      "first_ts": "2026-06-23T16:12:47.950Z",
+      "last_ts": "2026-06-23T16:22:09.816Z"
+    },
+    {
+      "src": "team-lead",
+      "dst": "arch-researcher",
+      "kind": "task_assign",
+      "count": 1
+    },
+    {
+      "src": "team-lead",
+      "dst": "agents-env-researcher",
+      "kind": "task_assign",
+      "count": 1
+    },
+    {
+      "src": "team-lead",
+      "dst": "cli-researcher",
+      "kind": "task_assign",
+      "count": 1
+    },
+    {
+      "src": "team-lead",
+      "dst": "benchmarks-researcher",
+      "kind": "task_assign",
+      "count": 1
+    },
+    {
+      "src": "team-lead",
+      "dst": "infra-researcher",
+      "kind": "task_assign",
+      "count": 1
+    }
+  ],
+  "tasks": [
+    {
+      "id": "1",
+      "subject": "Research core architecture & execution lifecycle",
+      "description": "Investigate Harbor's core abstractions and how a run flows end-to-end. Focus on:\n- `src/harbor/agents/base.py` (BaseAgent abstract class), `agents/factory.py`\n- `src/harbor/environments/base.py` (BaseEnvironment), `environments/factory.py`\n- `src/harbor/orchestrators/` — how trials are orchestrated (concurrency, retries)\n- `src/harbor/trial/` and `src/harbor/job.py` — trial vs job models and lifecycle\n- `src/harbor/models/` — Pydantic v2 data models (agent, job, task, trial, metric, verifier)\n- The async execution lifecycle: environment.start → agent.setup → agent.run → verifier.verify → environment.stop\n- `src/harbor/__init__.py` lazy-import pattern\n\nDeliver: a structured summary (key files with paths, the main classes/interfaces, the end-to-end flow of `harbor run`, concurrency model, and notable design patterns). Cite file paths. Report findings back to the team lead via SendMessage when done, then mark this task completed.",
+      "owner": "arch-researcher",
+      "history": [
+        {
+          "action": "create",
+          "ts": "2026-06-23T16:09:50.301Z",
+          "step_id": 5
+        },
+        {
+          "action": "update",
+          "ts": "2026-06-23T16:10:46.333Z",
+          "step_id": 7,
+          "status": "in_progress",
+          "owner": "arch-researcher"
+        },
+        {
+          "action": "update",
+          "ts": "2026-06-23T16:26:20.119Z",
+          "step_id": 32,
+          "status": "deleted"
+        }
+      ],
+      "final_status": "deleted"
+    },
+    {
+      "id": "2",
+      "subject": "Research agents & environment backends",
+      "description": "Survey Harbor's agent implementations and execution environment backends. Focus on:\n- `src/harbor/agents/installed/` — the 18+ built-in agents (claude-code, openhands, codex, aider, goose, gemini-cli, etc.): how they subclass BaseAgent, setup/run patterns, env var handling, `--ae`/`--agent-env`\n- `src/harbor/agents/installed/base.py` (BaseInstalledAgent) if present, `factory.py`, registration in `models/agent/name.py` (AgentName enum)\n- `src/harbor/agents/terminus_2/` and internal Terminus agents\n- `src/harbor/environments/` backends: docker, daytona, e2b, modal, runloop, apple_container, gke, openshift, novita — what each provides, how BaseEnvironment is implemented (start/stop/exec/upload), EnvironmentType enum & factory\n- SUPPORTS_ATIF and SUPPORTS_WINDOWS flags\n\nDeliver: a structured summary (catalog of agents with one-line each, catalog of environments, how to add a new agent/environment, key shared patterns). Cite file paths. Report findings back to the team lead via SendMessage when done, then mark this task completed.",
+      "owner": "agents-env-researcher",
+      "history": [
+        {
+          "action": "create",
+          "ts": "2026-06-23T16:09:50.301Z",
+          "step_id": 5
+        },
+        {
+          "action": "update",
+          "ts": "2026-06-23T16:10:46.333Z",
+          "step_id": 7,
+          "status": "in_progress",
+          "owner": "agents-env-researcher"
+        },
+        {
+          "action": "update",
+          "ts": "2026-06-23T16:26:20.119Z",
+          "step_id": 32,
+          "status": "deleted"
+        }
+      ],
+      "final_status": "deleted"
+    },
+    {
+      "id": "3",
+      "subject": "Research the CLI & command surface",
+      "description": "Survey Harbor's command-line interface and user-facing workflows. Focus on:\n- `src/harbor/cli/main.py` — entry point, how command groups are registered (app.add_typer), the `harbor`/`hr`/`hb` scripts\n- Each command module in `src/harbor/cli/`: run/jobs/datasets/trials/tasks/traces/sweeps/adapters/adapter_wizard/publish/analyze/cache/view, plus `admin/`, `annotator/`, `debug_checker/`, `quality_checker/`, `template-*`\n- The primary `harbor run` command — its flags (--dataset, --agent, --model, --n-concurrent, --ae, --agent-import-path combined into --agent per recent commit), how it maps to jobs/trials\n- Sweeps (parameter sweeps), traces viewing, analysis backend\n- Recently added flags: agent/verifier log-filter flags on `harbor trial start`\n\nDeliver: a structured summary (the command tree, the main user workflows from CLI, key flags, how the CLI maps onto the core models). Cite file paths. Report findings back to the team lead via SendMessage when done, then mark this task completed.",
+      "owner": "cli-researcher",
+      "history": [
+        {
+          "action": "create",
+          "ts": "2026-06-23T16:10:14.191Z",
+          "step_id": 6
+        },
+        {
+          "action": "update",
+          "ts": "2026-06-23T16:10:46.333Z",
+          "step_id": 7,
+          "status": "in_progress",
+          "owner": "cli-researcher"
+        },
+        {
+          "action": "update",
+          "ts": "2026-06-23T16:26:20.119Z",
+          "step_id": 32,
+          "status": "deleted"
+        }
+      ],
+      "final_status": "deleted"
+    },
+    {
+      "id": "4",
+      "subject": "Research benchmarks, verifier, metrics & registry",
+      "description": "Survey Harbor's benchmark adapter system, verification, metrics, and dataset registry. Focus on:\n- `adapters/` — how the 50+ adapters convert external benchmarks (SWE-Bench, Terminal-Bench, Aider Polyglot, LiveCodeBench, etc.) to Harbor task format; the adapter.py/run_adapter.py/template structure\n- The task format: task.toml, instruction.md, environment/, tests/ (test.sh writes reward to /logs/verifier/reward.txt or reward.json), solution/\n- `src/harbor/verifier/` — the test verification system; `src/harbor/models/verifier/`\n- `src/harbor/metrics/` — metrics collection incl. pass@k (recently added unit tests, commit 496293b0)\n- `src/harbor/registry/` and `registry.json` (13.9MB!) + `src/harbor/dataset/` — dataset registry, how datasets are listed/resolved (`harbor datasets list`, `dataset@version` syntax)\n- `src/harbor/models/trajectories/` — the ATIF (Agent Trajectory Interchange Format)\n- `src/harbor/leaderboard/`\n\nDeliver: a structured summary (how adapters work, the canonical task format, the verifier contract, metrics incl pass@k, how the registry/datasets work, ATIF overview). Cite file paths. Report findings back to the team lead via SendMessage when done, then mark this task completed.",
+      "owner": "benchmarks-researcher",
+      "history": [
+        {
+          "action": "create",
+          "ts": "2026-06-23T16:10:14.191Z",
+          "step_id": 6
+        },
+        {
+          "action": "update",
+          "ts": "2026-06-23T16:10:46.333Z",
+          "step_id": 7,
+          "status": "in_progress",
+          "owner": "benchmarks-researcher"
+        },
+        {
+          "action": "update",
+          "ts": "2026-06-23T16:26:20.119Z",
+          "step_id": 32,
+          "status": "deleted"
+        }
+      ],
+      "final_status": "deleted"
+    },
+    {
+      "id": "5",
+      "subject": "Research web apps, storage, packages & CI/CD",
+      "description": "Survey Harbor's web apps, storage, publishing, packages, and CI/CD. Focus on:\n- `apps/viewer/` — the results viewer web app (React Router + Vite): what it visualizes, tech stack, how it gets data\n- `docs/` — the documentation site (Next.js + Fumadocs)\n- `src/harbor/storage/` (Supabase backends), `src/harbor/db/`, `src/harbor/auth/` (OAuth callback server) — note the Supabase/PostgREST pagination rules from AGENTS.md\n- `src/harbor/publisher/` — package publishing & registry DB; `src/harbor/upload/` and `src/harbor/download/`\n- `packages/` — the uv workspace members (harbor-rewardkit, harbor-langsmith); how `pyproject.toml [tool.uv.workspace]` ties them\n- `.github/workflows/` — CI/CD (pytest, ruff, ty, claude-code-review, sync-registry, adapter-review, etc.)\n- `examples/training/` and the RL optimization claim — how Harbor generates rollouts for RL\n- `rfcs/` and `skills/`\n\nDeliver: a structured summary (viewer app overview, docs, storage/auth model, publisher/registry, workspace packages, CI matrix, RL/training hooks). Cite file paths. Report findings back to the team lead via SendMessage when done, then mark this task completed.",
+      "owner": "infra-researcher",
+      "history": [
+        {
+          "action": "create",
+          "ts": "2026-06-23T16:10:14.191Z",
+          "step_id": 6
+        },
+        {
+          "action": "update",
+          "ts": "2026-06-23T16:10:46.333Z",
+          "step_id": 7,
+          "status": "in_progress",
+          "owner": "infra-researcher"
+        },
+        {
+          "action": "update",
+          "ts": "2026-06-23T16:26:20.119Z",
+          "step_id": 32,
+          "status": "deleted"
+        }
+      ],
+      "final_status": "deleted"
+    }
+  ],
+  "pattern": "mapreduce",
+  "pattern_confidence": 0.85,
+  "pattern_reason": "single leader fans out to 5 worker role(s) (parallel execution, no peer messaging); reduce step quality: partial (synthesis present)",
+  "reduce_quality": "partial",
+  "worker_count": 5,
+  "peer_message_edges": 0,
+  "orphan_targets": []
+}
