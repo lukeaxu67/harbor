@@ -9,8 +9,10 @@ automatically from the default pipeline — call ``judge_report`` explicitly
 from __future__ import annotations
 
 import asyncio
+import json
 import os
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 from team_eval.eval.judge_prompts import (
@@ -125,15 +127,48 @@ def _to_verdict(state: JudgeState, model: str | None) -> Verdict:
     )
 
 
+def _load_claude_settings_env(
+    settings_path: str | Path | None = None,
+) -> dict[str, str]:
+    """Load the ``env`` block from the user's Claude ``settings.json``.
+
+    claude-agent-sdk spawns the CLI in a subprocess that does NOT reliably
+    inherit the user's configured provider — e.g. a custom
+    ``ANTHROPIC_BASE_URL`` + ``ANTHROPIC_AUTH_TOKEN`` + ``ANTHROPIC_MODEL``
+    (BigModel/GLM, a proxy, etc.). Without these the spawned judge hits the real
+    Anthropic endpoint and fails with ``api_retry``. Passing the settings ``env``
+    block through ``ClaudeAgentOptions(env=...)`` makes the judge session use the
+    same provider as the user's interactive Claude Code.
+    """
+    path = Path(settings_path) if settings_path else Path.home() / ".claude" / "settings.json"
+    override = os.environ.get("TEAM_EVAL_CLAUDE_SETTINGS")
+    if override:
+        path = Path(override)
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    env = data.get("env") or {}
+    return {str(k): str(v) for k, v in env.items() if isinstance(v, (str, int, float, bool))}
+
+
 async def _run_judge(prompt: str, workdir: str, model: str | None) -> JudgeState:
     state = JudgeState()
+    settings_env = _load_claude_settings_env()
+    # Default to the user's configured base model (e.g. glm-5.2) rather than the
+    # SDK's tier alias, which may map to a "<model>[1M]" name needing a beta.
+    effective_model = model or settings_env.get("ANTHROPIC_MODEL")
+    stderr_lines: list[str] = []
     kwargs: dict[str, Any] = {
         "allowed_tools": ["Read", f"mcp__{JUDGE_SERVER_NAME}__{JUDGE_TOOL_NAME}"],
         "permission_mode": "bypassPermissions",
         "mcp_servers": {JUDGE_SERVER_NAME: _create_judge_server(state)},
+        "env": settings_env,
+        "setting_sources": ["user"],
+        "stderr": lambda line: stderr_lines.append(line),
     }
-    if model:
-        kwargs["model"] = model
+    if effective_model:
+        kwargs["model"] = effective_model
     if workdir:
         kwargs["cwd"] = workdir
     options = ClaudeAgentOptions(**kwargs)
@@ -146,6 +181,12 @@ async def _run_judge(prompt: str, workdir: str, model: str | None) -> JudgeState
                     state.cost_usd = getattr(message, "total_cost_usd", None)
     except Exception as exc:  # noqa: BLE001 - surface any judge failure
         state.error = f"{type(exc).__name__}: {exc}"
+    # Surface the SDK stderr so failures (api_retry, auth) are diagnosable
+    # instead of the opaque "Check stderr output for details".
+    if (state.error or not state.called) and stderr_lines:
+        state.error = (state.error or "judge did not call the verdict tool") + (
+            "\n--- SDK stderr (tail) ---\n" + "".join(stderr_lines[-30:])
+        )
     return state
 
 

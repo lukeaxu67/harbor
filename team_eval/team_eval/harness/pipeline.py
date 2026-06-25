@@ -25,6 +25,7 @@ def process_session(
     judge: bool = False,
     judge_workdir: str = ".",
     judge_model: str | None = None,
+    write: bool = True,
 ) -> dict[str, Any]:
     """Run the full pipeline on one session and write artifacts.
 
@@ -32,6 +33,9 @@ def process_session(
     If ``register`` is True, append a dataset entry under ``sessions_dir``.
     If ``judge`` is True, run the cc-sdk LLM judge on subjective checks
     (needs claude-agent-sdk + Claude auth; spends tokens).
+    If ``write`` is False, skip all artifact writes (used by ``--checks-only``);
+    the report/graph are still returned so the caller can print the scorecard
+    without clobbering any previously-written (e.g. judged) artifacts.
     """
     session = load_team_session(session_path)
     graph = build_team_graph(session)
@@ -51,23 +55,25 @@ def process_session(
                               workdir=judge_workdir, model=judge_model)
 
     out_dir = Path(runs_dir) / session.session_id
-    out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / "atif.json").write_text(
-        json.dumps(traj.to_json_dict(exclude_none=True), ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-    (out_dir / "graph.json").write_text(
-        json.dumps(graph.model_dump(exclude_none=True), ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-    (out_dir / "eval.json").write_text(
-        json.dumps(report.model_dump(exclude_none=True), ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-    html_path = write_report(
-        session, graph, report, out_dir / "report.html",
-        atif_validation=atif_val, annotations=annotations,
-    )
+    html_path = None
+    if write:
+        out_dir.mkdir(parents=True, exist_ok=True)
+        (out_dir / "atif.json").write_text(
+            json.dumps(traj.to_json_dict(exclude_none=True), ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        (out_dir / "graph.json").write_text(
+            json.dumps(graph.model_dump(exclude_none=True), ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        (out_dir / "eval.json").write_text(
+            json.dumps(report.model_dump(exclude_none=True), ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        html_path = write_report(
+            session, graph, report, out_dir / "report.html",
+            atif_validation=atif_val, annotations=annotations,
+        )
 
     result = {
         "session_id": session.session_id,
@@ -79,7 +85,7 @@ def process_session(
         "html_path": html_path,
     }
 
-    if register and sessions_dir is not None:
+    if register and sessions_dir is not None and write:
         from team_eval.harness.dataset import register_session
 
         register_session(

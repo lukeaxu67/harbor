@@ -11,6 +11,15 @@ import sys
 
 from team_eval.harness.pipeline import process_session
 
+# Scorecard uses Unicode glyphs (✓✗!?). On Windows the default stdout codec
+# is often GBK, which can't encode them — force UTF-8 so the CLI prints cleanly
+# regardless of console code page.
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except (ValueError, OSError):
+        pass
+
 _SYM = {"pass": "✓", "fail": "✗", "warn": "!", "not_applicable": "–", "pending": "?"}
 
 
@@ -61,6 +70,7 @@ def main(argv: list[str] | None = None) -> int:
         judge=args.judge,
         judge_workdir=args.judge_cwd,
         judge_model=args.judge_model,
+        write=not args.checks_only,
     )
     report = result["report"]
 

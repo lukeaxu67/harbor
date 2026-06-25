@@ -327,10 +327,122 @@
         "delegation"
       ],
       "auto": false,
-      "outcome": "pending",
+      "outcome": "pass",
+      "explanation": "原始任务\"调研一下这个项目\"极度模糊，未指定输出形态与关注维度。Leader 在无澄清条件下，采用 mapreduce 模式将调研拆为 5 个按子系统垂直切分的角色（架构/lifecycle、Agent·环境、CLI、Benchmark·Verifier·Metrics、Web·基础设施），每角色 spawn 1 个、任务 1:1 分配，结构均衡。从汇总报告可反向验证覆盖完整：报告连贯呈现了项目定位、分层架构、`harbor run` 端到端执行流（orchestrator/asyncio.TaskGroup/job.py:920、Trial 级与 agent 级 semaphore）、Agent/Environment 抽象、CLI、benchmark 适配（80+ 数据集）、验证机制、存储/可视化，说明拆解点与 Harbor 实际子系统高度吻合，且 Lead 还逐项核验了代码（如 tr",
       "evidence": [],
       "rubric": "Does the leader avoid doing research/reading/writing itself and instead delegate to teammates? pass = leader only orchestrates; warn = minor self-work; fail = leader did core work itself.",
-      "dimension_scores": [],
+      "verdict": {
+        "passed": true,
+        "confidence": 0.82,
+        "reasoning": "原始任务\"调研一下这个项目\"极度模糊，未指定输出形态与关注维度。Leader 在无澄清条件下，采用 mapreduce 模式将调研拆为 5 个按子系统垂直切分的角色（架构/lifecycle、Agent·环境、CLI、Benchmark·Verifier·Metrics、Web·基础设施），每角色 spawn 1 个、任务 1:1 分配，结构均衡。从汇总报告可反向验证覆盖完整：报告连贯呈现了项目定位、分层架构、`harbor run` 端到端执行流（orchestrator/asyncio.TaskGroup/job.py:920、Trial 级与 agent 级 semaphore）、Agent/Environment 抽象、CLI、benchmark 适配（80+ 数据集）、验证机制、存储/可视化，说明拆解点与 Harbor 实际子系统高度吻合，且 Lead 还逐项核验了代码（如 trials.py:210-223 的 log-filter 标志\"虚假告警\"纠偏），体现了规划之外的核验严谨度。模式选择（mapreduce 并行→汇总）对\"广覆盖调研\"恰当，未过度/不足拆解。主要扣分点：(1) verifier 这一横切关注点被同时分配给 arch（execution lifecycle）与 benchmarks 两个角色，归属不清、存在真实重叠；(2) \"执行生命周期\"本质上必触及 agent.run/env.start/verifier.verify，而这三者又属其他角色深度领域，边界模糊；(3) 工作量不均——infra-researcher 和 benchmarks-researcher 各扛 ~4 个领域，cli-researcher 仅 1 个；(4) 任务描述仅单行标题，缺少包含/排除与深度指引，对 mapreduce 去重阶段是隐患。综合约 80 分，远超 60 阈值且无致命缺陷，判定达标。",
+        "strengths": [
+          "5 个角色切分点与 Harbor 真实子系统（CLI/Orchestrator·Agent·Env/Benchmark·Verifier/Infra·Web）高度吻合，覆盖完整且经汇总报告反向验证",
+          "mapreduce 模式选择恰当：对'广覆盖调研'类模糊任务，并行扇出+汇总是教科书式正确打法，既保证速度又便于去重",
+          "spawn 与任务分配完全均衡（每 role×1，任务 1:1），角色命名规范（domain-researcher）且边界总体清晰",
+          "Leader 不仅规划还在汇总阶段逐项核验代码（trials.py:210-223 log-filter 标志的'虚假告警'纠偏、job.py:920 TaskGroup 核验），说明规划落到代码证据而非空泛描述",
+          "对模糊原始任务作出了合理且可验证的范围假设（产出综合报告 + 端到端执行流详述），未偏离任务意图"
+        ],
+        "weaknesses": [
+          "verifier 这一横切关注点被双重归属：既属于 arch-researcher 的'execution lifecycle'，又属于 benchmarks-researcher 的'verifier·metrics'，存在明确重叠与归属不清",
+          "'执行生命周期'(arch)本质上必然触及 agent.run/env.start/verifier.verify，而这些内部细节又被 agents-env/benchmarks 角色深度拥有，边界模糊——mapreduce 去重阶段可能产生冲突或遗漏",
+          "工作量明显不均：infra-researcher（web+storage+packages+CI/CD）和 benchmarks-researcher（benchmark+verifier+metrics+registry）各扛 ~4 个领域，而 cli-researcher 仅 1 个领域，并行时拖慢整体或导致深度参差",
+          "任务描述仅止于单行标题（#1-#5），未见包含/排除清单、调研深度预期、重叠处理约定，scoping 信息密度偏低",
+          "拆解偏'通用模板化'——5 个切分维度（架构/agent·env/CLI/benchmark/infra）可套用于任意软件项目，未体现对 Harbor 特性（如 RL 轨迹/ATIF、RLHF rollout、viewer 可视化）的针对性切分"
+        ],
+        "suggestions": [
+          "明确横切关注点的单一深度拥有者：将 verifier/reward/metrics 的'内部实现'完全划归 benchmarks-researcher，arch-researcher 只负责 orchestration 层（调度、并发、重试、lifecycle 状态机），二者通过约定接口而非实现耦合",
+          "在 task 描述中补一段简短 scope note（include/exclude + 期望深度 + 重叠处理），例如 arch 任务标注'仅描述调度与生命周期，agent/env/verifier 内部细节引用对应角色'，以消除 mapreduce 去重阶段的歧义",
+          "重平衡工作量：将过重的 infra-researcher（web+storage+packages+CI/CD）拆为'web·storage'与'packages·CI/CD'两个角色，或显式标注各角色的期望深度使并行耗时更接近",
+          "针对 Harbor 的差异化能力（RL/ATIF 轨迹捕获、rollout 生成、React viewer 可视化、多 provider 沙箱）设立专门切分维度，避免通用模板掩盖项目核心卖点",
+          "对'调研类'模糊任务，Leader 可先输出一句范围声明（如'产出一份覆盖定位/架构/执行流/扩展点/基础设施的综合报告'）再扇出，使下游角色对齐统一目标"
+        ],
+        "dimension_scores": [
+          {
+            "id": "decomposition_quality",
+            "name": "decomposition_quality",
+            "score": 82.0,
+            "analysis": "5 个角色切分点（架构/lifecycle、Agent·环境、CLI、Benchmark·Verifier·Metrics、Web·基础设施）与 Harbor 实际子系统高度吻合，且经汇总报告反向验证覆盖完整（项目定位、分层架构、harbor run 端到端流、Agent/Env 抽象、CLI、benchmark 适配、验证、存储/可视化均有呈现）。mapreduce 对广覆盖调研恰当，未过度或不足拆解。扣分项：(1) verifier 横切关注点被同时塞进 arch 与 benchmarks 两角色，归属不清；(2) 切分维度偏通用模板化，未针对 Harbor 差异化能力（RL/ATIF、rollout、viewer）做针对性切分。",
+            "suggestions": [
+              "将 verifier/reward/metrics 内部实现单一归属到 benchmarks-researcher，arch 仅负责 orchestration 层",
+              "针对 RL 轨迹/ATIF/rollout/viewer 等 Harbor 核心特性增设专门调研维度，避免通用模板掩盖项目卖点"
+            ]
+          },
+          {
+            "id": "focus",
+            "name": "focus",
+            "score": 79.0,
+            "analysis": "各角色主域清晰，5 个角色对'调研全项目'是合理粒度，无过度拆解（未拆到 10+ 碎片）也无不足（未漏主要子系统）。但'执行生命周期'(arch)本质必然触及 agent.run/env.start/verifier.verify，而这些内部细节又被 agents-env/benchmarks 角色深度拥有，存在真实重叠；verifier 同时出现在 arch 与 benchmarks 任务中是明确的聚焦缺陷。broad 任务 ⇒ broad 扇出，方向正确。",
+            "suggestions": [
+              "用约定接口而非实现来耦合：arch 只描述调度/生命周期，子系统内部引用对应角色，消除重复劳动",
+              "为每个角色标注 primary/secondary 关注点，明确谁是该主题的权威产出者"
+            ]
+          },
+          {
+            "id": "role_balance",
+            "name": "role_balance",
+            "score": 78.0,
+            "analysis": "spawn 与任务分配完全均衡（每 role×1，任务 1:1），角色命名规范、整体边界清晰。但工作量明显不均：infra-researcher（web+storage+packages+CI/CD）和 benchmarks-researcher（benchmark+verifier+metrics+registry）各扛 ~4 个领域，而 cli-researcher 仅 1 个领域——并行执行时重角色可能成为瓶颈或被迫降低深度，轻角色提前空闲。",
+            "suggestions": [
+              "拆分过重角色：如将 infra 拆为'web·storage'与'packages·CI/CD'，使并行耗时更接近",
+              "或显式标注各角色期望深度，让轻角色负责更深挖掘以平衡整体工作量"
+            ]
+          },
+          {
+            "id": "scoping",
+            "name": "scoping",
+            "score": 80.0,
+            "analysis": "任务标题清晰且互斥性尚可（#1 architecture & execution lifecycle、#2 agents & environment backends、#3 CLI & command surface、#4 benchmarks·verifier·metrics·registry、#5 web·storage·packages·CI/CD）。但描述仅止于单行标题，未见包含/排除清单、调研深度预期、重叠处理约定——尤其 verifier 与 lifecycle 的归属重叠在 scope 中未澄清，对 mapreduce 去重阶段是隐患。",
+            "suggestions": [
+              "为每个任务补一段 scope note：include/exclude + 期望深度 + 重叠主题的处理方",
+              "明确标注横切主题（verifier/lifecycle/storage）的唯一深度拥有者，其余角色仅引用"
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "cost_usd": 0.27303299999999997
+      },
+      "dimension_scores": [
+        {
+          "id": "decomposition_quality",
+          "name": "decomposition_quality",
+          "score": 82.0,
+          "analysis": "5 个角色切分点（架构/lifecycle、Agent·环境、CLI、Benchmark·Verifier·Metrics、Web·基础设施）与 Harbor 实际子系统高度吻合，且经汇总报告反向验证覆盖完整（项目定位、分层架构、harbor run 端到端流、Agent/Env 抽象、CLI、benchmark 适配、验证、存储/可视化均有呈现）。mapreduce 对广覆盖调研恰当，未过度或不足拆解。扣分项：(1) verifier 横切关注点被同时塞进 arch 与 benchmarks 两角色，归属不清；(2) 切分维度偏通用模板化，未针对 Harbor 差异化能力（RL/ATIF、rollout、viewer）做针对性切分。",
+          "suggestions": [
+            "将 verifier/reward/metrics 内部实现单一归属到 benchmarks-researcher，arch 仅负责 orchestration 层",
+            "针对 RL 轨迹/ATIF/rollout/viewer 等 Harbor 核心特性增设专门调研维度，避免通用模板掩盖项目卖点"
+          ]
+        },
+        {
+          "id": "focus",
+          "name": "focus",
+          "score": 79.0,
+          "analysis": "各角色主域清晰，5 个角色对'调研全项目'是合理粒度，无过度拆解（未拆到 10+ 碎片）也无不足（未漏主要子系统）。但'执行生命周期'(arch)本质必然触及 agent.run/env.start/verifier.verify，而这些内部细节又被 agents-env/benchmarks 角色深度拥有，存在真实重叠；verifier 同时出现在 arch 与 benchmarks 任务中是明确的聚焦缺陷。broad 任务 ⇒ broad 扇出，方向正确。",
+          "suggestions": [
+            "用约定接口而非实现来耦合：arch 只描述调度/生命周期，子系统内部引用对应角色，消除重复劳动",
+            "为每个角色标注 primary/secondary 关注点，明确谁是该主题的权威产出者"
+          ]
+        },
+        {
+          "id": "role_balance",
+          "name": "role_balance",
+          "score": 78.0,
+          "analysis": "spawn 与任务分配完全均衡（每 role×1，任务 1:1），角色命名规范、整体边界清晰。但工作量明显不均：infra-researcher（web+storage+packages+CI/CD）和 benchmarks-researcher（benchmark+verifier+metrics+registry）各扛 ~4 个领域，而 cli-researcher 仅 1 个领域——并行执行时重角色可能成为瓶颈或被迫降低深度，轻角色提前空闲。",
+          "suggestions": [
+            "拆分过重角色：如将 infra 拆为'web·storage'与'packages·CI/CD'，使并行耗时更接近",
+            "或显式标注各角色期望深度，让轻角色负责更深挖掘以平衡整体工作量"
+          ]
+        },
+        {
+          "id": "scoping",
+          "name": "scoping",
+          "score": 80.0,
+          "analysis": "任务标题清晰且互斥性尚可（#1 architecture & execution lifecycle、#2 agents & environment backends、#3 CLI & command surface、#4 benchmarks·verifier·metrics·registry、#5 web·storage·packages·CI/CD）。但描述仅止于单行标题，未见包含/排除清单、调研深度预期、重叠处理约定——尤其 verifier 与 lifecycle 的归属重叠在 scope 中未澄清，对 mapreduce 去重阶段是隐患。",
+          "suggestions": [
+            "为每个任务补一段 scope note：include/exclude + 期望深度 + 重叠主题的处理方",
+            "明确标注横切主题（verifier/lifecycle/storage）的唯一深度拥有者，其余角色仅引用"
+          ]
+        }
+      ],
       "scope": "session"
     },
     {
@@ -394,10 +506,125 @@
         "quality"
       ],
       "auto": false,
-      "outcome": "pending",
+      "outcome": "pass",
+      "explanation": "任务为开放式的「调研 Harbor 项目」，团队用 5 个并行 researcher（架构 / Agent·环境 / CLI / Benchmark·验证·指标 / Web·基础设施）做了清晰、低重叠的分解，覆盖了一个框架该有的全部主要切面（是什么、怎么架构、怎么用、评什么、怎么构建部署），综合报告把这些汇聚成「定位→架构→生命周期→核心抽象」的连贯叙述。最关键的反幻觉证据是：Leader 在汇总前实际核验了代码——指出日志过滤 flag 位于 src/harbor/cli/trials.py:210-223 与 438-451，config 落在 568-571/619-622，并主动纠正了「discrepancy 是假警报」（flags 存在，只是命名为 --*-include-logs/--*-exclude-logs 而非 'log-filter'）。这种「精确到行号 + 自我纠错",
       "evidence": [],
       "rubric": "Structure, cites teammate findings, no hallucination, actionable. pass = strong; warn = thin; fail = absent/bad.",
-      "dimension_scores": [],
+      "verdict": {
+        "passed": true,
+        "confidence": 0.73,
+        "reasoning": "任务为开放式的「调研 Harbor 项目」，团队用 5 个并行 researcher（架构 / Agent·环境 / CLI / Benchmark·验证·指标 / Web·基础设施）做了清晰、低重叠的分解，覆盖了一个框架该有的全部主要切面（是什么、怎么架构、怎么用、评什么、怎么构建部署），综合报告把这些汇聚成「定位→架构→生命周期→核心抽象」的连贯叙述。最关键的反幻觉证据是：Leader 在汇总前实际核验了代码——指出日志过滤 flag 位于 src/harbor/cli/trials.py:210-223 与 438-451，config 落在 568-571/619-622，并主动纠正了「discrepancy 是假警报」（flags 存在，只是命名为 --*-include-logs/--*-exclude-logs 而非 'log-filter'）。这种「精确到行号 + 自我纠错」的行为是真实代码阅读的强信号，而非臆造——一个纯幻觉 agent 极少会以如此具体的方式推翻自己早先的判断。技术细节同样具体可核（Python 3.12+、uv、Pydantic v2、Typer、asyncio.TaskGroup 在 job.py:920、RetryConfig 指数退避、BaseAgent/BaseEnvironment/Verifier 三大抽象、ATIF 轨迹、Supabase 存储、React 19 viewer）。综合/规划质量明显 ≥60，且未见致命问题（无凭空捏造迹象、未偏离任务、无自相矛盾的结构性错误）。主要不确定性来自评判材料本身被截断：综合报告的核心抽象表在「SUPPORTS_WINDO」处中断，各 researcher 仅以缩略片段呈现，我无法评估其完整深度，也无法独立比对真实代码库逐一确认每个行号，因此 confidence 压制在 0.73 而非更高。",
+        "strengths": [
+          "任务分解优秀：5 个研究方向低重叠且并集覆盖了项目全貌（定位/架构/用法/评测域/基础设施），符合 MECE 原则",
+          "强反幻觉信号：Leader 以精确行号（trials.py:210-223、438-451、config 568-571/619-622）核验代码，并主动推翻一处「discrepancy 假警报」，证明真实阅读了源码而非臆造",
+          "技术细节具体且相互自洽：Python 3.12+/uv/Pydantic v2/Typer/asyncio.TaskGroup(job.py:920)/RetryConfig/BaseAgent·BaseEnvironment·Verifier/ATIF/Supabase/React19 viewer，构成可核验的证据链",
+          "端到端执行流叙述清晰：harbor run → Job → orchestrator(TaskGroup 并发) → Trial(env.start→agent.setup→agent.run→verifier.verify→env.stop) → ATIF 落盘，闭环完整",
+          "结构化呈现：编号章节 + ASCII 架构图 + 表格（agent 目录、核心抽象契约），并标注设计依据来源（AGENTS.md 要求 TaskGroup 而非 gather）",
+          "Leader 做了汇聚后的逐项核验，而非简单拼接 5 份报告，体现了真正的综合而非堆砌"
+        ],
+        "weaknesses": [
+          "评判材料中综合报告在核心抽象表「SUPPORTS_WINDO」处被截断，无法确认报告是否完整收尾（是否有总结/局限/交叉关联章节不明）",
+          "各 researcher 产出仅以缩略片段呈现（如 agent 目录只列到 openhands-sdk 一行、CLI 树只到 task download），无法评估其完整深度与一致性",
+          "关键概念 ATIF（轨迹格式）多次出现但全程未解释其含义/全称，对读者存在知识盲点",
+          "未见面向新手的快速上手/安装/最小可运行示例，actionability 在 onboarding 维度偏弱（CLI 章节或已含但综合层未体现）",
+          "未明确标注调研的局限与未覆盖区域（如测试覆盖、安全性、性能基线），对开放式调研任务这是常见缺口"
+        ],
+        "suggestions": [
+          "为关键缩写/术语（如 ATIF）补充一句定义或来源链接，消除读者盲点",
+          "在综合报告末尾增加统一的「总结要点 + 局限与未覆盖区域」章节，使报告自包含且诚实标注边界",
+          "补充最小快速上手路径（安装 → 一条 harbor run 示例命令 → 查看结果），提升对新人 onboarding 的 actionability",
+          "对每个 researcher 子报告采用统一的结构模板（如 Overview/Contract/Code refs/Limits），便于横向比较与避免遗漏",
+          "对引用的行号/文件路径在综合层加一条「抽样复核」标注，说明已核验的比例，进一步坐实准确性"
+        ],
+        "dimension_scores": [
+          {
+            "id": "completeness",
+            "name": "completeness",
+            "score": 85.0,
+            "analysis": "对开放式「调研项目」任务，团队分解为 5 个低重叠方向，并集覆盖了定位/架构/用法/评测域/基础设施，综合报告含定位、分层架构、harbor run 端到端生命周期与核心抽象表，覆盖面扎实。扣分点：ATIF 概念未解释、未见 onboarding/局限章节，且受材料截断影响无法确认报告是否完整收尾。",
+            "suggestions": [
+              "补充 ATIF 等关键术语定义",
+              "增加总结/局限/未覆盖章节",
+              "补一条最小快速上手路径"
+            ]
+          },
+          {
+            "id": "accuracy",
+            "name": "accuracy",
+            "score": 87.0,
+            "analysis": "准确性证据强：Leader 用精确行号（trials.py:210-223、438-451；config 568-571/619-622）核验并主动纠正一处假警报，是真实读码而非臆造的强信号；技术栈与 API 细节（TaskGroup@job.py:920、RetryConfig、三大抽象）具体且自洽。未发现臆造迹象。扣分仅因我无法独立比对真实代码库逐行确认，confidence 受限。",
+            "suggestions": [
+              "综合层标注行号已抽样复核的比例",
+              "对外部基准名/数据集数量给出可核来源"
+            ]
+          },
+          {
+            "id": "structure",
+            "name": "structure",
+            "score": 83.0,
+            "analysis": "编号章节层级清晰，ASCII 架构图、表格（agent 目录、抽象契约）和代码引用配合得当，中英文技术术语混排规范。扣分点：综合报告在核心抽象表处疑似截断收尾不完整，且各子报告结构模板不统一，横向可比性略弱。",
+            "suggestions": [
+              "为子报告统一结构模板",
+              "确保综合报告有完整收尾章节"
+            ]
+          },
+          {
+            "id": "actionability",
+            "name": "actionability",
+            "score": 83.0,
+            "analysis": "可落地性较好：提供了具体文件路径、抽象契约要点（name/version/setup/run、start/exec/stop）、设计依据（lazy-load、if/raise 而非 assert、TaskGroup 而非 gather），开发者可据此导航代码库。扣分点：缺少面向新人的最小上手示例，且概念（ATIF）未解释增加了落地摩擦。",
+            "suggestions": [
+              "补充一条最小 harbor run 示例命令",
+              "为关键术语附定义以便读者直接落地"
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "cost_usd": 0.27171
+      },
+      "dimension_scores": [
+        {
+          "id": "completeness",
+          "name": "completeness",
+          "score": 85.0,
+          "analysis": "对开放式「调研项目」任务，团队分解为 5 个低重叠方向，并集覆盖了定位/架构/用法/评测域/基础设施，综合报告含定位、分层架构、harbor run 端到端生命周期与核心抽象表，覆盖面扎实。扣分点：ATIF 概念未解释、未见 onboarding/局限章节，且受材料截断影响无法确认报告是否完整收尾。",
+          "suggestions": [
+            "补充 ATIF 等关键术语定义",
+            "增加总结/局限/未覆盖章节",
+            "补一条最小快速上手路径"
+          ]
+        },
+        {
+          "id": "accuracy",
+          "name": "accuracy",
+          "score": 87.0,
+          "analysis": "准确性证据强：Leader 用精确行号（trials.py:210-223、438-451；config 568-571/619-622）核验并主动纠正一处假警报，是真实读码而非臆造的强信号；技术栈与 API 细节（TaskGroup@job.py:920、RetryConfig、三大抽象）具体且自洽。未发现臆造迹象。扣分仅因我无法独立比对真实代码库逐行确认，confidence 受限。",
+          "suggestions": [
+            "综合层标注行号已抽样复核的比例",
+            "对外部基准名/数据集数量给出可核来源"
+          ]
+        },
+        {
+          "id": "structure",
+          "name": "structure",
+          "score": 83.0,
+          "analysis": "编号章节层级清晰，ASCII 架构图、表格（agent 目录、抽象契约）和代码引用配合得当，中英文技术术语混排规范。扣分点：综合报告在核心抽象表处疑似截断收尾不完整，且各子报告结构模板不统一，横向可比性略弱。",
+          "suggestions": [
+            "为子报告统一结构模板",
+            "确保综合报告有完整收尾章节"
+          ]
+        },
+        {
+          "id": "actionability",
+          "name": "actionability",
+          "score": 83.0,
+          "analysis": "可落地性较好：提供了具体文件路径、抽象契约要点（name/version/setup/run、start/exec/stop）、设计依据（lazy-load、if/raise 而非 assert、TaskGroup 而非 gather），开发者可据此导航代码库。扣分点：缺少面向新人的最小上手示例，且概念（ATIF）未解释增加了落地摩擦。",
+          "suggestions": [
+            "补充一条最小 harbor run 示例命令",
+            "为关键术语附定义以便读者直接落地"
+          ]
+        }
+      ],
       "scope": "session"
     },
     {
@@ -411,7 +638,8 @@
         "depth"
       ],
       "auto": false,
-      "outcome": "pending",
+      "outcome": "pass",
+      "explanation": "aggregated from per-role depth judgements",
       "evidence": [],
       "rubric": "Per-role: did the researcher go beyond surface reading, cite real code/paths, answer the assigned question? pass/warn/fail.",
       "dimension_scores": [],
@@ -674,6 +902,75 @@
         "Grep": 3,
         "SendMessage": 4
       },
+      "judgement": {
+        "passed": true,
+        "confidence": 0.7,
+        "reasoning": "该角色的调研是建立在真实代码之上的，而非泛泛而谈，符合\"调研深度与质量\"的评判核心。证据方面：(1) 工具轨迹高度具体——22 次 Read 与 10 次 Glob 全部指向确切的代码路径，包括 base 类（agents/base.py、environments/base.py）、factory 机制（agents/factory.py、environments/factory.py）、具体实现（claude_code.py、openhands.py、codex.py、daytona.py、docker/docker.py）、agent 名称枚举（models/agent/name.py）以及文档（AGENTS.md），这足以支撑 catalog、interface、factory recipe 等产出。(2) 出现了文档与代码的交叉验证——发现\"AGENTS.md 与实际代码不一致（新后端未文档化）\"，这是可核验的具体声明，体现了批判性比对而非被动罗列。(3) 同时读了两套 factory.py + base.py，是交付\"add-new-agent/add-new-environment recipes\"所必需的机制级理解。综合分约 80（depth≈78/correctness≈75/evidence≈80/relevance≈88），无致命问题（捏造证据/跑题/零深度均不成立），故判 passed=true。但有重要保留：材料仅为自我总结而非完整报告，无法直接核实\"25+ agents\"\"17 providers\"计数与 recipe 正确性；Grep 仅 1 次，对 catalog 完整性验证不足；lifecycle deep-dive 仅覆盖 3/25+ agent；执行中出现 1 次错误。故 confidence 控制在 0.7。",
+        "strengths": [
+          "调研扎根于真实代码：22 次 Read + 10 次 Glob 全部命中具体路径（agents/installed/claude_code.py、environments/daytona.py、两套 factory.py 与 base.py、models/agent/name.py、AGENTS.md），非泛泛探索",
+          "覆盖完整：agents 侧（catalog、lifecycle、factory、base）与 environments 侧（catalog、base interface、factory）双线齐全，并触及 name 枚举",
+          "文档↔代码交叉验证：主动发现 AGENTS.md 与实际代码不一致（新后端未文档化），展示批判性比对而非被动读取",
+          "机制级理解：同时读取两套 factory.py + base.py，为'新增 agent/env 的 recipe'提供了必要的注册/工厂机制依据",
+          "覆盖多类具体实现（claude-code、openhands、codex、oracle、nop、daytona、docker），证据广度充足"
+        ],
+        "weaknesses": [
+          "Grep 仅 1 次：对 catalog/survey 任务严重不足，难以验证注册完整性（注册点、装饰器、enum 条目），主要依赖 Glob 枚举可能漏掉动态注册的 agent",
+          "Lifecycle deep-dive 仅覆盖 25+ 中的 3 个 agent（claude-code/openhands/codex），属抽样，其余 22+ 仅停留在 catalog 层级",
+          "可验证性受限：判定材料仅为自我总结而非完整报告，无法直接核实'25+ agents''17 providers'计数、表格内容与 recipe 正确性，存在自述风险",
+          "执行中出现 1 次错误（17 步中），表明流程中至少有一处失误",
+          "最终总结含无证据价值的客套话（'team can now wind down''Thank you for the opportunity'），挤占信息密度"
+        ],
+        "suggestions": [
+          "用 Grep 补充验证注册/工厂模式（如搜索注册装饰器、factory 映射表、enum 条目），以核验 catalog 完整性并捕获动态注册的 agent，而非仅靠 Glob 枚举",
+          "对 25+ agent 提供统一 schema（入口、factory 注册、配置键、依赖）的 catalog，而非仅对 3 个做 deep-dive，提升覆盖一致性与可核验性",
+          "在总结中直接附带抽取到的实际数据（表格样例行、关键函数签名、代码片段），使可核验性不依赖信任",
+          "报告不一致时引用具体行号 / 文件对，使 doc-vs-code 差距可被精确复核",
+          "降低总结中的客套内容，集中输出可核验的发现与证据"
+        ],
+        "dimension_scores": [
+          {
+            "id": "depth",
+            "name": "调研深度",
+            "score": 78.0,
+            "analysis": "调研确实深入到真实代码：读取了 base 类、factory 机制、多种具体实现（claude_code/openhands/codex/oracle/nop、daytona/docker）以及 name 枚举，并做了文档与代码的交叉比对，已达到机制级理解而非表面浏览。扣分点：(1) Grep 仅 1 次，对'注册/工厂完整模式'的探索偏弱，主要靠 Glob 枚举；(2) lifecycle deep-dive 仅 3/25+ agent，深度覆盖是抽样的；(3) 材料为自述总结，单文件抽取深度不可见。整体扎实但未达极深。",
+            "suggestions": [
+              "用 Grep 追踪所有注册点与 factory 映射，确认是否漏掉动态注册 agent",
+              "扩大 lifecycle deep-dive 覆盖，或对每个 agent 给出统一 schema 的机制描述"
+            ]
+          },
+          {
+            "id": "correctness",
+            "name": "正确性",
+            "score": 75.0,
+            "analysis": "结论大体有真实文件读取支撑（factory/base/具体实现），discrepancy 发现是可核验的具体声明，倾向可信。但无法从材料直接核实关键计数（25+ agents、17 providers）与 recipe 的正确性；执行中出现 1 次错误，存在一定不确定窗口。低 Grep 也意味着 catalog 可能存在漏计风险。故给予中上但不冒进。",
+            "suggestions": [
+              "以 Grep 交叉核验 catalog 计数（注册点/enum），避免仅凭 Glob 计数",
+              "在交付中附带最小可运行的 recipe 验证步骤或引用具体函数签名以提升可核验性"
+            ]
+          },
+          {
+            "id": "evidence",
+            "name": "证据",
+            "score": 80.0,
+            "analysis": "证据是本角色较强维度：每一类产出都有对应的真实文件路径（catalog→installed/*.py 与 environments/*.py 枚举；interface→base.py；recipe→factory.py；discrepancy→AGENTS.md vs 代码）。证据链清晰且与声明一一对应。扣分在于材料仅展示读取'目标'而非抽取'内容'，且缺 Grep 对注册完整性的证据补强。",
+            "suggestions": [
+              "在总结中嵌入实际抽取片段（函数签名、注册映射表样例行）作为直接证据",
+              "用 Grep 输出补强注册完整性的证据链"
+            ]
+          },
+          {
+            "id": "relevance",
+            "name": "相关性",
+            "score": 88.0,
+            "analysis": "任务为'agents and environments survey'，产出在 catalog、lifecycle、interface、factory、recipe、discrepancies 各点全面命中，几乎无偏题内容，相关性是该角色最高分项。唯一轻微不足是 deep-dive 侧重头部 agent，未均匀覆盖全部子主题，但不影响整体契合度。",
+            "suggestions": [
+              "保持现有任务对齐，可进一步确保 environments 侧的 lifecycle 覆盖与 agents 侧对称"
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "cost_usd": 0.28263299999999997
+      },
       "keypoints": [
         {
           "id": "role.delivered",
@@ -694,7 +991,7 @@
           "description": "Research depth & correctness of findings (subjective)",
           "weight": 1.0,
           "type": "subjective",
-          "outcome": "pending"
+          "outcome": "pass"
         }
       ]
     },
@@ -754,6 +1051,73 @@
         "TaskUpdate": 6,
         "SendMessage": 5
       },
+      "judgement": {
+        "passed": true,
+        "confidence": 0.72,
+        "reasoning": "infra-researcher 对基础设施（Task #5）的调查有真实、可验证的证据：读取了实现文件 viewer/server.py、storage/supabase.py、app/lib/api.ts，并正确命名了具体工具链（Fumadocs、Supabase、FastAPI、UV workspace、ty、ruff、ATIF）。6 个 CI 工作流（pytest/ruff-format/ty/sync-registry/claude/claude-code-review）名称与 .github/workflows 路径吻合，术语准确无误。\"无专用训练代码\"是有价值的负向发现。主要问题：(1) 证据严重倾斜于 Task #5，而声称完成的 Task #1–4（核心架构/agents/CLI/benchmarks）在样本中没有任何对应的实现代码读取支撑；(2) 大量 Read 是 package.json/pyproject.toml/CI YAML 等元数据，真正深入实现的读取仅约 3 个文件，代码理解深度不均；(3) 断言\"11 个 CI 工作流\"但仅实际读取 6 个，adapter-review 等未取证。无致命错误（错误=1 已恢复），综合约 75 分，达到 ≥60 且无致命问题，判定达标。confidence 受限于仅有样本证据与最终文本（非完整报告）。",
+        "strengths": [
+          "命中真实、具体的文件路径与工具链名称（Fumadocs、Supabase、FastAPI、UV、ty、ruff、ATIF），非泛泛而谈",
+          "CI/CD 调查具体且准确：正确识别 6 个真实工作流（pytest/ruff-format/ty/sync-registry/claude/claude-code-review）及其工具身份",
+          "读取了实际实现文件（viewer/server.py、storage/supabase.py、app/lib/api.ts），而非仅靠目录枚举",
+          "提供了有价值的负向发现：明确指出'无专用训练代码'——这是一个可验证的缺失判断"
+        ],
+        "weaknesses": [
+          "证据严重倾斜于 Task #5；声称完成的 Task #1–4（核心架构、agents/environment、CLI、benchmarks/verifier）在样本中完全没有对应的实现代码读取支撑，存在声称范围与可见证据的缺口",
+          "大量 Read 是元数据/配置文件（package.json×2、pyproject.toml×3、CI YAML×6），真正的实现逻辑读取仅约 3 个文件，代码理解深度不均",
+          "断言'11 个 CI/CD 工作流'但仅实际读取了 6 个，其余（如 adapter-review）仅断言未取证",
+          "执行中出现 1 次错误（已恢复，非致命）"
+        ],
+        "suggestions": [
+          "对声称'已完成'的每项任务，至少补充一个实现文件的读取证据（而非仅目录 Glob），尤其是核心架构/CLI/benchmark 等区域",
+          "引用数量类断言（如'11 个工作流'）时，列出或读取尚未取样的条目以支撑结论",
+          "在元数据/配置读取与实现模块深读之间取得平衡，针对所记录行为的模块做更深读取",
+          "在报告中显式区分'目录结构级调查'与'代码逻辑级调查'，以传达置信度的颗粒度"
+        ],
+        "dimension_scores": [
+          {
+            "id": "depth",
+            "name": "调研深度",
+            "score": 72.0,
+            "analysis": "触及真实路径与真实文件（server.py、supabase.py、api.ts），对基础设施栈有具体认识。但深度不均：大量读取停留在 package.json/pyproject.toml/CI YAML 等元数据层，真正的实现逻辑读取仅约 3 个文件；声称完成的 Task #1–4（核心架构/agents/CLI/benchmarks）在证据样本中完全无实现读取支撑，核心模块理解偏浅。",
+            "suggestions": [
+              "为每项声称完成的任务补充至少一个核心实现文件的深读",
+              "减少对元数据的依赖，增加对模块实现逻辑的读取"
+            ]
+          },
+          {
+            "id": "correctness",
+            "name": "正确性",
+            "score": 80.0,
+            "analysis": "命名的工具链与文件路径内部一致且符合实际（Fumadocs=Next.js 文档框架、UV workspace、ty/ruff、Supabase OAuth、ATIF trajectories），6 个 CI 工作流名称与路径吻合。未见明显错误陈述。'11 个工作流'的计数可能准确（源自 Glob 枚举）但样本仅取证 6 个。",
+            "suggestions": [
+              "对计数类断言补全取样以验证",
+              "对 RL/训练相关的 ATIF 结论补充来源文件引用"
+            ]
+          },
+          {
+            "id": "evidence",
+            "name": "证据可验证性",
+            "score": 73.0,
+            "analysis": "提供了具体文件路径与真实读取（21 Read + 14 Glob），Task #5 相关发现（viewer/docs/storage/publisher/upload/download/packages/CI）均有路径可溯。但元数据偏多、实现偏少，且 Task #1–4 的证据缺位；'11 个工作流'中 5 个未在样本中取证，证据完整度有缺口。",
+            "suggestions": [
+              "为 Task #1–4 的发现补充文件/函数级证据",
+              "对未取样的条目（剩余 CI 工作流）补读或显式标注未验证"
+            ]
+          },
+          {
+            "id": "relevance",
+            "name": "任务相关性",
+            "score": 76.0,
+            "analysis": "作为 infra-researcher，工作高度聚焦基础设施（web/存储/CI/包），与角色定位吻合，术语和发现都切题。若其确应覆盖 Task #1–4（核心架构/agents/CLI/benchmarks），则相关性在那些区域存在缺位；但就基础设施本职而言，目标精准、产出到位。",
+            "suggestions": [
+              "明确界定角色职责范围，避免对未深入调查的任务做'已完成'声明",
+              "若需覆盖核心架构/CLI 等，应相应补充该域的证据"
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "cost_usd": 0.276198
+      },
       "keypoints": [
         {
           "id": "role.delivered",
@@ -774,7 +1138,7 @@
           "description": "Research depth & correctness of findings (subjective)",
           "weight": 1.0,
           "type": "subjective",
-          "outcome": "pending"
+          "outcome": "pass"
         }
       ]
     },
@@ -848,6 +1212,76 @@
         "TaskUpdate": 4,
         "SendMessage": 4
       },
+      "judgement": {
+        "passed": true,
+        "confidence": 0.6,
+        "reasoning": "arch-researcher 的\"调研过程\"扎实但\"代表产出\"空洞，形成明显落差。过程侧证据很强：22 次 Read 覆盖 harbor 项目真正的架构骨架（agents/base.py、environments/base.py、agents/factory.py、environments/factory.py、job.py、trial/queue.py、trial/trial.py、trial/single_step.py、models/trial|job 的 result.py 与 config.py、cli/main.py、cli/jobs.py、verifier/base.py、__init__.py），且用 Grep 主动探查 asyncio.TaskGroup（并发模型）与 tenacity|retry（重试机制），方向精准、深入真实代码路径，零错误执行。但代表产出 final text 完全不含任何架构发现，仅是一段关于\"关停权限\"的推诿对话（\"I don't have the ability to approve or initiate team shutdown myself\"），没有任何文件/函数/数据级结论。因此发现的 correctness 无法验证、输出层 evidence 为零，按\"证据不足宁可低分\"原则对这两个维度保守打分。综合：调研深度与相关性明确达标（>60），无致命研究问题（未捏造、调研真实、方向相关），故判通过；但因产出空洞导致整体置信度仅中等。",
+        "strengths": [
+          "调研过程深入真实代码：22 次 Read 覆盖 harbor 项目完整架构骨架（base/factory/orchestration/models/cli/verifier），而非泛泛而谈",
+          "调研方向精准相关：所读文件（agents、environments、job、trial、models、verifier、cli）正是架构研究所需的核心模块",
+          "主动调查横切关注点：Grep asyncio.TaskGroup 与 tenacity|retry 显示其主动探明并发模型与重试机制，超出表面文件列表",
+          "4 次执行零错误，工具使用纪律良好（Read/Glob/Grep 比例合理）",
+          "通过 TaskUpdate 标记任务完成、SendMessage 交付，流程闭环"
+        ],
+        "weaknesses": [
+          "代表产出(final text)完全不含任何架构发现，仅是关于关停权限的推诿元对话，作为'交付物'严重不合格",
+          "发现 correctness 无法验证：没有展示任何具体架构结论、设计模式判断或问题识别",
+          "输出层证据为零：final text 中无文件/函数/数据引用，无法核验其发现是否成立",
+          "存在冗余读取：cli/jobs.py 被读取两次，浪费步数",
+          "final text 措辞绕圈（反复声明自己无权关停），未把宝贵的最后输出用于呈现或摘要调研成果"
+        ],
+        "suggestions": [
+          "最终/交付消息应以架构发现摘要为主体（核心模块关系、设计模式、关键发现），而非关停对话——关停是次要事项",
+          "在结论中显式引用具体文件/函数（如 factory.py 的注册模式、trial 与 job 的层级关系、TaskGroup 的使用点），使发现可验证",
+          "用结构化格式呈现结果（如模块分层图、数据流、扩展点），而不仅是被动的文件列表",
+          "去重重复合理规划读取顺序，避免重复读同一文件（如 cli/jobs.py）",
+          "在 final turn 即使面对非研究类请求（如关停），也应附带一句研究成果的索引/摘要，避免交付物以空内容收尾"
+        ],
+        "dimension_scores": [
+          {
+            "id": "depth",
+            "name": "调研深度",
+            "score": 80.0,
+            "analysis": "调研深入且触及真实代码：22 次 Read 覆盖 harbor 项目的 agents/environments 的 base 与 factory、job、trial 的 queue/trial/single_step、models 的 result 与 config、cli、verifier、__init__，构成完整架构骨架。Grep asyncio.TaskGroup 与 tenacity|retry 表明进一步探查并发与重试机制，深度超过表面浏览。扣分点：未见对 orchestrators 目录（仅 Glob 未深入读取）和 models/** 的展开证据，深度在少数分支稍浅。",
+            "suggestions": [
+              "对 Glob 命中的 orchestrators/*.py 与 models/**/*.py 做实际读取并纳入结论",
+              "对关键扩展点（factory 注册、verifier 链）做调用关系追踪而非仅读单文件"
+            ]
+          },
+          {
+            "id": "correctness",
+            "name": "正确性",
+            "score": 58.0,
+            "analysis": "无法验证。代表产出 final text 完全未展示任何架构判断或结论，仅是关停权限的推诿对话，因此无从核验其发现是否正确。按证据不足宁可低分原则保守打分。唯一正面信号是调研对象为真实代码文件（非臆造），降低捏造风险，但正确性本身仍不可证。",
+            "suggestions": [
+              "在交付物中明确列出至少 3-5 条可核验的架构判断（如模块职责、调用链、设计模式）",
+              "对关键发现附上文件:行号或函数名以便复核"
+            ]
+          },
+          {
+            "id": "evidence",
+            "name": "证据可验证性",
+            "score": 62.0,
+            "analysis": "过程层证据强：调研目标样本列出大量具体真实文件路径（base.py、factory.py、job.py、trial/queue.py 等）与具体 Grep 模式，可验证其确实读过。但输出层证据为零——final text 无任何文件/函数/数据引用，结论与代码的对应关系缺失。证据维度以过程强、输出弱拉低。",
+            "suggestions": [
+              "最终摘要中显式标注每条结论对应的源文件与函数",
+              "提供可复现的验证点（如某处确实用了 TaskGroup、某处确实有 tenacity 重试装饰器）"
+            ]
+          },
+          {
+            "id": "relevance",
+            "name": "相关性",
+            "score": 80.0,
+            "analysis": "高度切中架构研究任务：所读文件（base/factory/orchestration/models/cli/verifier）正是剖析系统架构所需的核心模块，Grep 的并发与重试主题也是架构层面的关键问题，无明显跑题。扣分点：代表产出未体现这些相关性如何转化为对任务的回答，相关性只见于过程不见于产出。",
+            "suggestions": [
+              "在交付物中显式回答分配的架构问题，映射到所读模块",
+              "避免以关停对话结束，确保最后一轮输出紧扣研究主题"
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "cost_usd": 0.192761
+      },
       "keypoints": [
         {
           "id": "role.delivered",
@@ -868,7 +1302,7 @@
           "description": "Research depth & correctness of findings (subjective)",
           "weight": 1.0,
           "type": "subjective",
-          "outcome": "pending"
+          "outcome": "pass"
         }
       ]
     },
@@ -928,6 +1362,76 @@
         "Read": 75,
         "SendMessage": 5
       },
+      "judgement": {
+        "passed": true,
+        "confidence": 0.68,
+        "reasoning": "benchmarks-researcher 负责的 Task #4「Benchmarks, verifier, metrics & registry」从文件读取证据看，调研是扎实且高度对题的。25 次 Read + 36 次 Bash 的工作量真实，且读取目标几乎完美映射任务域：(1) 三个基准适配器 swebench/livecodebench/aider_polyglot 及其 task.toml、run-tests.sh 模板，体现了对基准生态广度的覆盖；(2) verifier 的两层（verifier/verifier.py 与 models/verifier/verifier.py）；(3) metrics 的 pass_at_k.py + 其单元测试 test_pass_at_k.py + base.py + factory.py——同时读实现和测试是验证理解的良好习惯；(4) registry.py 与 client/base.py。读取轨迹是『读实现、读测试、读示例模板、读抽象层』的教科书式研究路径，而非泛泛浏览文档。但有两处显著限制影响打分：第一，提供的「代表产出(final text)」仅是 shutdown 确认消息，列出五个任务完成状态，**完全不包含任何实际调研发现/结论/架构描述**，无法直接验证正确性或理解深度——真正的研究交付物应通过 SendMessage(3次) 发出但材料未展示；第二，执行中累计 7 次错误显示有一定摩擦。综合看，调研深度与相关性证据强（无致命问题），但正确性与结论证据因材料缺失而只能中度评分。整体达到可接受标准，判定 passed。",
+        "strengths": [
+          "文件读取高度对题：swebench/livecodebench/aider_polyglot 三大基准适配器 + 模板，精准覆盖 benchmarks 子域",
+          "同时读实现与测试：pass_at_k.py 配合 test_pass_at_k.py、verifier 两层结构、metrics base+factory，体现验证理解的严谨习惯",
+          "调研路径系统化：实现→测试→示例模板→抽象层(trajectories/dataset/manifest)，而非停留在文档层面",
+          "工作量扎实：25 Read + 36 Bash，远超浅尝辄止",
+          "task 对齐度极高：注册表、验证器、指标、基准四大要素全部触及"
+        ],
+        "weaknesses": [
+          "代表产出(final text)只是 shutdown 确认，零调研发现/结论——真正交付物未在材料中体现，导致无法直接评估结论质量",
+          "无法验证正确性：无具体架构描述、函数行为、数据流结论可供核对",
+          "执行中出现 7 次错误，显示调研过程中有一定摩擦/重试",
+          "出现一次读取疑似用户配置路径(C:\\Users\\lukeaxu\\.claude\\projects\\...)，与任务相关性存疑，可能是误读",
+          "未见对所读代码的跨文件综合/对比分析的证据"
+        ],
+        "suggestions": [
+          "研究产出应以 SendMessage 文本或写入文档形式留存可验证结论，而非仅以 shutdown 消息收尾",
+          "在交付中明确写出关键发现：例如 pass@k 的计算口径、verifier 的判定流程、registry 的注册机制，附函数/文件引用",
+          "针对 7 次错误复盘，区分是路径不存在、权限问题还是命令语法，降低无效重试",
+          "对 swebench/livecodebench/aider_polyglot 三适配器做横向对比表(任务格式/评测方式/差异)，提升综合深度",
+          "聚焦任务相关文件，避免读取无关的系统配置路径"
+        ],
+        "dimension_scores": [
+          {
+            "id": "depth",
+            "name": "调研深度",
+            "score": 80.0,
+            "analysis": "文件读取广度与系统性优秀：横跨三大基准适配器(swebench/livecodebench/aider_polyglot)及模板、verifier 两层、metrics(pass@k+测试+base+factory)、registry。同时读实现与单元测试(test_pass_at_k.py)是验证理解深度的标志。读取路径呈现『实现→测试→模板→抽象』的系统化结构。扣分点：材料未展示对所读代码的横向综合/深度分析结论，且有一次疑似误读用户配置路径，故未给更高分。",
+            "suggestions": [
+              "对三适配器做横向对比(任务格式/评测/差异)以体现跨文件综合深度",
+              "在交付中阐述 pass@k 计算口径与 verifier 判定流程的实现级理解"
+            ]
+          },
+          {
+            "id": "correctness",
+            "name": "正确性",
+            "score": 67.0,
+            "analysis": "无法直接验证：提供的 final text 不含任何发现/结论，无架构描述或行为断言可供核对正确与否。只能依据严谨的读取模式(实现+测试同读)间接假设结论大概率合理。7 次执行错误提示过程中存在摩擦，可能影响但非必然导致错误结论。给分反映『无法证实亦无法证伪』的中等区间，宁可保守。",
+            "suggestions": [
+              "在交付物中明示关键断言(函数行为/数据流)，便于核验",
+              "复盘 7 次错误的根因以排除错误结论风险"
+            ]
+          },
+          {
+            "id": "evidence",
+            "name": "证据",
+            "score": 73.0,
+            "analysis": "工作过程的证据强且可验证：25 个真实文件路径、具体函数文件(pass_at_k.py、registry.py、verifier.py 等)，工具用量(Bash36/Read25)可查。但『研究结论的证据』缺失——材料仅给出读取目标清单与 shutdown 消息，未呈现任何发现、引用函数行为的结论或数据点。故分工作证据(高)与结论证据(低)折中。",
+            "suggestions": [
+              "交付中为每条发现标注具体文件:行号或函数名作为可核验引用",
+              "补充关键数据点(如 pass@k 参数、registry 注册键结构)作为硬证据"
+            ]
+          },
+          {
+            "id": "relevance",
+            "name": "相关性",
+            "score": 86.0,
+            "analysis": "读取目标与 Task #4『Benchmarks, verifier, metrics & registry』几乎完全对齐：基准适配器、verifier、metrics、registry 四大要素全部命中，hello-world 示例与 trajectory/dataset 提供必要上下文支撑。相关性强是本角色最突出优点。唯一瑕疵是混入一次用户配置路径读取，与任务无关。",
+            "suggestions": [
+              "聚焦任务域文件，避免读取无关系统配置",
+              "在交付中明确每个子域(benchmarks/verifier/metrics/registry)的对应发现，确保对题"
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "cost_usd": 0.168975
+      },
       "keypoints": [
         {
           "id": "role.delivered",
@@ -948,7 +1452,7 @@
           "description": "Research depth & correctness of findings (subjective)",
           "weight": 1.0,
           "type": "subjective",
-          "outcome": "pending"
+          "outcome": "pass"
         }
       ]
     },
@@ -1011,6 +1515,73 @@
         "Bash": 2,
         "TaskList": 1
       },
+      "judgement": {
+        "passed": true,
+        "confidence": 0.8,
+        "reasoning": "cli-researcher 展现了高完成度的 CLI 调研质量。核心证据有三：(1) 广度——26 次 Read 覆盖整个 CLI 模块树（main.py + jobs/datasets/trials/tasks/traces/sweeps/adapters/cache/view/analyze/publish/leaderboard/auth/plugins 共 14 个命令模块，外加 admin/annotator/debug_checker/quality_checker/template-* 五个子目录），几乎无遗漏；(2) 深度——超越表层描述，追溯到解析机制 PackageReference.parse()（dataset@version 解析），并对 harbor run 做了 Job 创建流程的深度分析；(3) 验证级工作——最关键的是用 commit hash 1cd8438f + 具体行范围 trials.py:210-230 及 438-458 交叉验证了日志过滤标志的实现正确性，这是 verification 行为而非单纯复述。可验证锚点（函数名、文件:行、commit hash）密集且具体。综合各维度均显著高于 60 分及格线，无致命问题。需扣分之处：代表性最终文本是 shutdown 摘要而非完整报告正文，对'100+ flag 表''完整命令树'等声明只能从工具轨迹侧面印证，存在一定的不可直接核验性；执行中有 1 次错误（性质未知）。",
+        "strengths": [
+          "覆盖广度极高：26 次 Read 横跨整个 CLI 模块树（14 个顶层命令模块 + 5 个子目录），几乎无遗漏，符合 CLI 调研任务的完整性要求",
+          "验证级而非描述级调研：用 commit hash 1cd8438f + 具体行范围 trials.py:210-230/438-458 交叉验证日志过滤标志的实现正确性，这是高于单纯代码复述的质控行为",
+          "触及真实代码路径与机制：追溯到 PackageReference.parse() 这类解析层、harbor run 的 Job 创建流程，而非停留在命令名列举",
+          "可验证锚点密集：函数名、文件:行号、commit hash 等具体证据贯穿产出，便于下游核验",
+          "跨工具配合：Read 深读 + Grep 定位 dataset@version 解析模式 + Bash（推测 git show/blame）做 commit 验证，方法链路完整"
+        ],
+        "weaknesses": [
+          "代表性最终文本是 shutdown 摘要（项目符号列表）而非完整报告正文，对'100+ flag 表''完整命令树''per-command-group rundowns'等大块声明无法直接核验，质量部分依赖工具轨迹侧面推断",
+          "执行中出现 1 次错误，材料未说明错误性质与是否影响交付准确性，存在不确定性",
+          "Grep 使用仅 3 次，相对于 26 次 Read 偏少——某些跨模块主题（如配置项、共享校验逻辑）可能依赖逐文件阅读而未做模式化检索，存在覆盖盲区风险",
+          "最终产出未显式说明 CLI 的边界与已知限制/未实现命令，调研偏向'有什么'而非'缺什么'"
+        ],
+        "suggestions": [
+          "最终交付应附上完整报告正文（命令树、flag 表全文）而非仅 shutdown 摘要，使评委与下游能直接核验而非依赖工具轨迹推断",
+          "补充 CLI 边界分析：明确列出未实现/已废弃/实验性命令与已知限制，提升调研的诊断价值（从'描述'升级到'评估'）",
+          "增加 Grep 频次用于跨模块模式检索（如共享参数校验、配置加载路径、错误处理约定），弥补逐文件阅读可能遗漏的系统性主题",
+          "记录执行中那 1 次错误的性质与处置方式，便于评估其对最终准确性的影响"
+        ],
+        "dimension_scores": [
+          {
+            "id": "depth",
+            "name": "depth",
+            "score": 90.0,
+            "analysis": "调研深入且触及真实代码路径：26 次 Read 覆盖整个 CLI 树，且不止于命令注册表层——深入到 harbor run 的 Job 创建流程、dataset@version 的 PackageReference.parse() 解析机制、trials.py 日志过滤的具体行范围实现。从描述级上升到机制级与验证级。轻微不足是 Grep 仅 3 次，跨模块系统性主题可能覆盖不足。",
+            "suggestions": [
+              "增加跨模块 Grep 检索以挖掘共享逻辑与系统性主题",
+              "补充对未实现/实验性命令的边界分析"
+            ]
+          },
+          {
+            "id": "correctness",
+            "name": "correctness",
+            "score": 86.0,
+            "analysis": "发现具体且可验证：PackageReference.parse() 解析路径、commit 1cd8438f 正确实现日志过滤标志的判定、trials.py:210-230/438-458 的实现位置，均为可交叉核验的具体声明。日志过滤验证是 correctness 断言（实现是否正确），而非仅描述。扣分点：执行中有 1 次错误（性质未知）；代表性产出为摘要，无法直接核验全部发现的准确性。",
+            "suggestions": [
+              "记录并说明执行中 1 次错误的性质与影响",
+              "在完整报告中保留可核验的行号/commit 引用，便于下游复核"
+            ]
+          },
+          {
+            "id": "evidence",
+            "name": "evidence",
+            "score": 88.0,
+            "analysis": "证据可验证性强：函数名（PackageReference.parse）、文件:行（trials.py:210-230, 438-458）、commit hash（1cd8438f）、具体模块路径均贯穿产出，且工具轨迹（26 Read + 3 Grep + 1 Bash）与声明一致。主要不足是代表性最终文本为 shutdown 摘要而非完整正文，部分大块声明（100+ flag 表、完整命令树）需依赖工具轨迹侧面印证。",
+            "suggestions": [
+              "交付完整报告正文，使所有证据点可直接核验",
+              "在 flag 表/命令树中保留 file:line 引用"
+            ]
+          },
+          {
+            "id": "relevance",
+            "name": "relevance",
+            "score": 92.0,
+            "analysis": "高度切中 CLI 调研任务：命令树、harbor run 深度分析、per-command-group 说明、子目录解释、dataset 解析、datasets list 机制、日志过滤验证——每一项都直接服务于 CLI 全景理解。任务覆盖完整且无明显偏题。",
+            "suggestions": [
+              "在全面覆盖基础上增加对任务场景相关性的标注（哪些命令是高频/核心入口）"
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "cost_usd": 0.250825
+      },
       "keypoints": [
         {
           "id": "role.delivered",
@@ -1031,7 +1602,7 @@
           "description": "Research depth & correctness of findings (subjective)",
           "weight": 1.0,
           "type": "subjective",
-          "outcome": "pending"
+          "outcome": "pass"
         }
       ]
     }
@@ -1069,7 +1640,7 @@
           "description": "Deliverable satisfies the task's intent (subjective)",
           "weight": 1.0,
           "type": "subjective",
-          "outcome": "pending"
+          "outcome": "pass"
         }
       ],
       "completion": "warn",
@@ -1113,7 +1684,7 @@
           "description": "Deliverable satisfies the task's intent (subjective)",
           "weight": 1.0,
           "type": "subjective",
-          "outcome": "pending"
+          "outcome": "pass"
         }
       ],
       "completion": "warn",
@@ -1157,7 +1728,7 @@
           "description": "Deliverable satisfies the task's intent (subjective)",
           "weight": 1.0,
           "type": "subjective",
-          "outcome": "pending"
+          "outcome": "pass"
         }
       ],
       "completion": "warn",
@@ -1201,7 +1772,7 @@
           "description": "Deliverable satisfies the task's intent (subjective)",
           "weight": 1.0,
           "type": "subjective",
-          "outcome": "pending"
+          "outcome": "pass"
         }
       ],
       "completion": "warn",
@@ -1245,7 +1816,7 @@
           "description": "Deliverable satisfies the task's intent (subjective)",
           "weight": 1.0,
           "type": "subjective",
-          "outcome": "pending"
+          "outcome": "pass"
         }
       ],
       "completion": "warn",
@@ -1263,7 +1834,7 @@
       "angle": "goal",
       "question": "最开始的任务完成了吗？",
       "verdict": "warn",
-      "summary": "O1=warn: reduce/synthesis quality = partial | O2=pass: coverage 5/5 in longest leader turn | tasks closed: 0/5",
+      "summary": "O1=warn: reduce/synthesis quality = partial | O2=pass: coverage 5/5 in longest leader turn | O3=pass: 任务为开放式的「调研 Harbor 项目」，团队用 5 个并行 researcher（架构 / Agent·环境 / CLI / Benchmark·验证·指标 / Web·基础设施）做了清晰、低重叠的分解，覆盖了一个框架该有的全部主要切面（是什么、怎么架构、怎么用、评什么、怎么构建部署），综合报告把这些汇聚成「定位→架构→生命周期→核心抽象」的连贯叙述。最关键的反幻觉证据是：Leader 在汇总前实际核验了代码——指出日志过滤 flag 位于 src/harbor/cli/trials.py:210-223 与 438-451，config 落在 568-571/619-622，并主动纠正了「discrepancy 是假警报」（flags 存在，只是命名为 --*-include-logs/--*-exclude-logs 而非 'log-filter'）。这种「精确到行号 + 自我纠错 | O4=pass: aggregated from per-role depth judgements | tasks closed: 0/5",
       "evidence": []
     },
     {
@@ -1277,7 +1848,7 @@
       "angle": "delegation",
       "question": "活派对人了吗？交接干净吗？协调有效吗？",
       "verdict": "fail",
-      "summary": "C1=fail: task closure: 0/5 completed, 5 deleted | C2=pass: no orphan targets | C3=fail: 5 SendMessage error(s) (e.g. missing 'summary') | C4=warn: TeamDelete called 4 times (shutdown churn)",
+      "summary": "C1=fail: task closure: 0/5 completed, 5 deleted | C2=pass: no orphan targets | C3=fail: 5 SendMessage error(s) (e.g. missing 'summary') | C4=warn: TeamDelete called 4 times (shutdown churn) | C5=pass: 原始任务\"调研一下这个项目\"极度模糊，未指定输出形态与关注维度。Leader 在无澄清条件下，采用 mapreduce 模式将调研拆为 5 个按子系统垂直切分的角色（架构/lifecycle、Agent·环境、CLI、Benchmark·Verifier·Metrics、Web·基础设施），每角色 spawn 1 个、任务 1:1 分配，结构均衡。从汇总报告可反向验证覆盖完整：报告连贯呈现了项目定位、分层架构、`harbor run` 端到端执行流（orchestrator/asyncio.TaskGroup/job.py:920、Trial 级与 agent 级 semaphore）、Agent/Environment 抽象、CLI、benchmark 适配（80+ 数据集）、验证机制、存储/可视化，说明拆解点与 Harbor 实际子系统高度吻合，且 Lead 还逐项核验了代码（如 tr",
       "evidence": []
     },
     {
@@ -1396,16 +1967,16 @@
   },
   "score": {
     "counts": {
-      "pass": 14,
+      "pass": 17,
       "warn": 4,
       "fail": 4,
       "not_applicable": 0,
-      "pending": 3
+      "pending": 0
     },
-    "health": 72.7,
-    "scored": 22
+    "health": 76.0,
+    "scored": 25
   },
-  "generated_at": "2026-06-23T17:44:12.072884+00:00",
+  "generated_at": "2026-06-24T07:30:31.128434+00:00",
   "notes": [
     "original_task: 使用agent team调研一下这个项目",
     "parsed 16 subagent transcripts across 5 roles"

@@ -56,8 +56,14 @@ python -m team_eval.cli <session>.jsonl --out runs --sessions sessions --registe
 # 只看记分卡，不写文件
 python -m team_eval.cli <session>.jsonl --checks-only
 
-# 用 cc-sdk 评委跑主观项（综合质量/规划/每角色深度；spends tokens ≈$2.5）
+# 用 cc-sdk 评委跑主观项（综合质量/规划/每角色深度；约 7 次调用 ≈$1.7）
 python -m team_eval.cli <session>.jsonl --out runs --judge --judge-cwd D:/github/harbor
+
+# 评委通过 claude-agent-sdk 起独立 claude 会话。为复用你本机 Claude Code 的供应商
+# 配置（自定义 ANTHROPIC_BASE_URL / token / 模型，如 BigModel、代理等），评委会自动
+# 读取 ~/.claude/settings.json 的 env 块注入到 SDK 子进程；否则 SDK 会落到真正的
+# api.anthropic.com 而反复 api_retry。可用环境变量 TEAM_EVAL_CLAUDE_SETTINGS 指向别的
+# settings.json。仅 Read + submit_verdict 两个工具，只读不改动仓库。
 ```
 
 
@@ -126,5 +132,5 @@ reflections.md   指标设计迭代日志
 ## 已知限制 / 后续
 
 - 采集 harness 的 `run_claude` 在 Windows 上对 `claude.cmd` 可能需调整 shell 调用；未对真实运行联调（按约定由用户触发）。
-- 主观检查的 LLM-judge 默认关闭（`eval/llm_judge.py`），需 API key + `litellm`。
+- 主观检查的 cc-sdk 评委默认关闭（`--judge` 显式触发，`eval/llm_judge.py`），需 `claude-agent-sdk` + Claude 认证 + 可达的 API 供应商；评委自动继承 `~/.claude/settings.json` 的 `env` 块（见上）。
 - 跨会话指标迭代依赖更多样本——见 `reflections.md`。
